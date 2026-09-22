@@ -26,6 +26,7 @@ class AdminContentApiController {
             case 'speakers': self::crud('speakers', ['name', 'role', 'company', 'bio', 'photo', 'instagram', 'linkedin'], $parts[1] ?? ''); break;
             case 'tickets': self::crud('ticket_types', ['name', 'description', 'price', 'quantity', 'benefits', 'sale_start', 'sale_end', 'status'], $parts[1] ?? ''); break;
             case 'faqs': self::crud('faqs', ['question', 'answer'], $parts[1] ?? ''); break;
+            case 'gallery': self::crud('event_gallery', ['image', 'caption'], $parts[1] ?? ''); break;
             case 'fields': self::fields($parts[1] ?? ''); break;
             case 'reorder': self::reorder(); break;
             default: json_response(['ok' => false, 'error' => 'Rota inválida.'], 404);
@@ -105,7 +106,7 @@ class AdminContentApiController {
         $section = preg_replace('/[^a-z0-9_]/', '', $input['section'] ?? '');
         $values = $input['values'] ?? [];
         if ($section === '' || !is_array($values)) json_response(['ok' => false, 'error' => 'Dados inválidos.'], 422);
-        $allowedSections = ['hero', 'countdown', 'about', 'experience', 'awards', 'schedule', 'speakers', 'venue', 'tickets', 'faq', 'register', 'cta_final', 'footer', 'legal', 'theme'];
+        $allowedSections = ['hero', 'countdown', 'about', 'experience', 'awards', 'schedule', 'speakers', 'gallery', 'venue', 'tickets', 'faq', 'register', 'cta_final', 'footer', 'legal', 'theme'];
         if (!in_array($section, $allowedSections, true)) json_response(['ok' => false, 'error' => 'Seção inválida.'], 422);
         foreach ($values as $k => $v) {
             $k = preg_replace('/[^a-z0-9_]/', '', (string) $k);
@@ -164,6 +165,9 @@ class AdminContentApiController {
             if ($table === 'ticket_types' && !empty($data['sale_start']) && !empty($data['sale_end']) && $data['sale_end'] < $data['sale_start']) {
                 json_response(['ok' => false, 'error' => 'O fim das vendas deve ser depois do início.'], 422);
             }
+            if ($table === 'event_gallery' && $id === 0 && empty($data['image'])) {
+                json_response(['ok' => false, 'error' => 'Envie uma foto.'], 422);
+            }
             if ($table === 'speakers') {
                 foreach (['instagram', 'linkedin'] as $uk) {
                     if (!empty($data[$uk]) && !preg_match('#^https?://#i', $data[$uk])) {
@@ -172,7 +176,7 @@ class AdminContentApiController {
                 }
             }
             // Troca de imagem: apaga o arquivo antigo (evita órfãos em uploads/)
-            $imgCol = $table === 'schedule_items' ? 'image' : ($table === 'speakers' ? 'photo' : null);
+            $imgCol = $table === 'schedule_items' ? 'image' : ($table === 'speakers' ? 'photo' : ($table === 'event_gallery' ? 'image' : null));
             if ($id > 0 && $imgCol && array_key_exists($imgCol, $data) && $data[$imgCol]) {
                 $oldRow = Database::fetch('SELECT ' . $imgCol . ' FROM ' . Database::table($table) . ' WHERE id = ? AND event_id = ?', [$id, $E]);
                 if ($oldRow && !empty($oldRow[$imgCol]) && $oldRow[$imgCol] !== $data[$imgCol]) {
@@ -185,7 +189,7 @@ class AdminContentApiController {
                 Audit::log(Auth::id(), $table . '_update', $table, $id);
             } else {
                 $max = (int) Database::fetchColumn('SELECT COALESCE(MAX(sort_order),-1) FROM ' . Database::table($table) . ' WHERE event_id = ?', [$E]);
-                if (in_array($table, ['schedule_items', 'speakers', 'ticket_types', 'faqs'], true)) $data['sort_order'] = $max + 1;
+                if (in_array($table, ['schedule_items', 'speakers', 'ticket_types', 'faqs', 'event_gallery'], true)) $data['sort_order'] = $max + 1;
                 if ($table === 'ticket_types') $data['created_at'] = now();
                 $id = Database::insert($table, $data);
                 Audit::log(Auth::id(), $table . '_create', $table, $id);
@@ -197,6 +201,11 @@ class AdminContentApiController {
             if ($table === 'ticket_types') {
                 $used = (int) Database::fetchColumn('SELECT COUNT(*) FROM ' . Database::table('registrations') . ' WHERE ticket_type_id = ?', [$id]);
                 if ($used > 0) json_response(['ok' => false, 'error' => 'Este ingresso possui inscrições vinculadas e não pode ser excluído. Pause-o.'], 422);
+            }
+            $imgCol = $table === 'schedule_items' ? 'image' : ($table === 'speakers' ? 'photo' : ($table === 'event_gallery' ? 'image' : null));
+            if ($imgCol) {
+                $oldRow = Database::fetch('SELECT ' . $imgCol . ' FROM ' . Database::table($table) . ' WHERE id = ? AND event_id = ?', [$id, $E]);
+                if ($oldRow && !empty($oldRow[$imgCol])) Upload::delete($oldRow[$imgCol]);
             }
             Database::delete($table, 'id = ? AND event_id = ?', [$id, $E]);
             Audit::log(Auth::id(), $table . '_delete', $table, $id);
@@ -297,7 +306,7 @@ class AdminContentApiController {
         $input = array_merge($_POST, json_input());
         $table = $input['table'] ?? '';
         $ids = $input['ids'] ?? [];
-        $allowed = ['schedule_items', 'speakers', 'ticket_types', 'faqs', 'registration_fields'];
+        $allowed = ['schedule_items', 'speakers', 'ticket_types', 'faqs', 'registration_fields', 'event_gallery'];
         if (!in_array($table, $allowed, true) || !is_array($ids)) {
             json_response(['ok' => false, 'error' => 'Dados inválidos.'], 422);
         }

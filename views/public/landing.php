@@ -28,6 +28,7 @@ if (!empty($ev['date_start'])) {
       <a href="#evento">O Evento</a>
       <a href="#experiencia">Experiência</a>
       <a href="#programacao">Programação</a>
+      <?php if (!empty($gallery)): ?><a href="#galeria">Galeria</a><?php endif; ?>
       <a href="#local">Local</a>
       <a href="#ingressos">Ingressos</a>
       <a href="#faq">FAQ</a>
@@ -41,6 +42,7 @@ if (!empty($ev['date_start'])) {
   <a href="#evento">O Evento</a>
   <a href="#experiencia">Experiência</a>
   <a href="#programacao">Programação</a>
+  <?php if (!empty($gallery)): ?><a href="#galeria">Galeria</a><?php endif; ?>
   <a href="#local">Local</a>
   <a href="#ingressos">Ingressos</a>
   <a href="#faq">FAQ</a>
@@ -231,6 +233,28 @@ if (!empty($ev['date_start'])) {
           <?php endif; ?>
         </div>
       </div>
+      <?php endforeach; ?>
+    </div>
+  </div>
+</section>
+<div class="divider"></div>
+<?php endif; ?>
+
+<!-- ================= GALERIA ================= -->
+<?php if (!empty($gallery)): ?>
+<section class="section" id="galeria">
+  <div class="container">
+    <div class="center reveal">
+      <span class="kicker center"><?= e($c('gallery', 'kicker', 'GALERIA')) ?></span>
+      <h2 class="sec-title"><?= e($c('gallery', 'title', 'Momentos Cronnus')) ?></h2>
+      <p class="sec-sub"><?= e($c('gallery', 'subtitle', '')) ?></p>
+    </div>
+    <div class="gal-grid">
+      <?php foreach ($gallery as $i => $g): ?>
+      <figure class="gal-item reveal <?= $i % 4 > 0 ? 'reveal-d' . min(3, $i % 4) : '' ?>" data-full="<?= e(url($g['image'])) ?>" data-cap="<?= e($g['caption'] ?? '') ?>" tabindex="0" role="button" aria-label="Ampliar foto<?= !empty($g['caption']) ? ': ' . e($g['caption']) : '' ?>">
+        <img src="<?= e(url($g['image'])) ?>" alt="<?= e($g['caption'] ?: 'Foto do evento') ?>" loading="lazy">
+        <?php if (!empty($g['caption'])): ?><figcaption><?= e($g['caption']) ?></figcaption><?php endif; ?>
+      </figure>
       <?php endforeach; ?>
     </div>
   </div>

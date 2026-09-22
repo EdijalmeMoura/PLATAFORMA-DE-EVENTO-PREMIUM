@@ -87,4 +87,11 @@ class Event {
             [self::id()]
         );
     }
+
+    public static function gallery() {
+        return Database::fetchAll(
+            'SELECT * FROM ' . Database::table('event_gallery') . ' WHERE event_id = ? ORDER BY sort_order, id',
+            [self::id()]
+        );
+    }
 }

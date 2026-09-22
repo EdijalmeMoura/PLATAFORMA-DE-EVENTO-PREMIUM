@@ -478,6 +478,16 @@ class Database {
                 ],
                 'indexes' => [['email'], ['token_hash']],
             ],
+            'event_gallery' => [
+                'cols' => [
+                    ['id', 'pk'],
+                    ['event_id', 'int'],
+                    ['image', 'string:255'],
+                    ['caption', 'string:160', ['null' => true]],
+                    ['sort_order', 'int', ['default' => 0]],
+                ],
+                'indexes' => [['event_id']],
+            ],
             'rate_limits' => [
                 'cols' => [
                     ['id', 'pk'],

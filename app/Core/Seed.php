@@ -139,6 +139,7 @@ class Seed {
                 'button' => 'ESCOLHER CONVITE',
             ],
             'faq' => ['kicker' => 'DÚVIDAS', 'title' => 'PERGUNTAS FREQUENTES', 'subtitle' => 'Tudo o que você precisa saber antes do grande dia.'],
+            'gallery' => ['kicker' => 'GALERIA', 'title' => 'MOMENTOS CRONNUS', 'subtitle' => 'Um gostinho da experiência que espera por você.'],
             'register' => [
                 'kicker' => 'INSCRIÇÃO · POR CONVITE', 'title' => 'GARANTA SUA PRESENÇA',
                 'subtitle' => 'Vagas limitadas. Preencha seus dados com atenção — seu ticket digital chega em seguida.',

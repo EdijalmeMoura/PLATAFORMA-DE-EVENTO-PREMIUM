@@ -12,6 +12,7 @@ $menu = [
     ['comunicacao', 'Comunicação', 'send', 'admin/comunicacao', 'comms.view'],
     ['programacao', 'Programação', 'list', 'admin/programacao', 'content.manage'],
     ['palestrantes', 'Palestrantes', 'mic', 'admin/palestrantes', 'content.manage'],
+    ['galeria', 'Galeria', 'image', 'admin/galeria', 'content.manage'],
     ['ingressos', 'Ingressos', 'ticket', 'admin/ingressos', 'content.manage'],
     ['formulario', 'Formulário', 'doc', 'admin/formulario', 'content.manage'],
     ['conteudo', 'Conteúdo', 'image', 'admin/conteudo', 'content.manage'],

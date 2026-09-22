@@ -272,6 +272,14 @@ class AdminController {
         ], 'content.manage');
     }
 
+    public static function gallery() {
+        self::page('galeria', [
+            'page' => 'galeria',
+            'page_title' => 'Galeria de Fotos',
+            'items' => Event::gallery(),
+        ], 'content.manage');
+    }
+
     public static function tickets() {
         self::page('ingressos', [
             'page' => 'ingressos',

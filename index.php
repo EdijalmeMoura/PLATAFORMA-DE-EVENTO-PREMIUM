@@ -85,6 +85,8 @@ if ($path === '' || $path === 'inicio') {
     AdminController::schedule();
 } elseif ($path === 'admin/palestrantes') {
     AdminController::speakers();
+} elseif ($path === 'admin/galeria') {
+    AdminController::gallery();
 } elseif ($path === 'admin/ingressos') {
     AdminController::tickets();
 } elseif ($path === 'admin/formulario') {

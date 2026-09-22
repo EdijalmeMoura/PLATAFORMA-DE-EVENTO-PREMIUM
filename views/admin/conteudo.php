@@ -122,13 +122,14 @@ $exps = json_decode($c('experience', 'cards', '[]'), true) ?: [];
   <div class="tab-pane" id="cc-sec">
     <?php
     $secs = [
-      'schedule' => 'Programação', 'speakers' => 'Palestrantes', 'venue' => 'Local',
+      'schedule' => 'Programação', 'speakers' => 'Palestrantes', 'gallery' => 'Galeria', 'venue' => 'Local',
       'tickets' => 'Ingressos', 'faq' => 'FAQ', 'register' => 'Inscrição', 'cta_final' => 'CTA Final', 'footer' => 'Rodapé',
     ];
     foreach ($secs as $sk => $label):
       $keys = [
         'schedule' => ['kicker' => 'Kicker', 'title' => 'Título', 'subtitle' => 'Subtítulo'],
         'speakers' => ['kicker' => 'Kicker', 'title' => 'Título', 'subtitle' => 'Subtítulo'],
+        'gallery' => ['kicker' => 'Kicker', 'title' => 'Título', 'subtitle' => 'Subtítulo'],
         'venue' => ['kicker' => 'Kicker', 'title' => 'Título', 'button' => 'Botão'],
         'tickets' => ['kicker' => 'Kicker', 'title' => 'Título', 'subtitle' => 'Subtítulo', 'button' => 'Botão'],
         'faq' => ['kicker' => 'Kicker', 'title' => 'Título', 'subtitle' => 'Subtítulo'],
