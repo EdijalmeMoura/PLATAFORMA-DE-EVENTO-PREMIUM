@@ -46,14 +46,16 @@ document.addEventListener('DOMContentLoaded', function () {
   document.getElementById('btn-new').addEventListener('click', function () {
     crudModal({ title: 'Novo campo personalizado', fields: FIELDS, onSave: save });
   });
-  // Edição dos existentes (valores atuais embutidos no item)
+  // Edição dos existentes (valores atuais via API)
   document.querySelectorAll('.act-edit').forEach(function (b) {
     b.addEventListener('click', function () {
-      var item = b.closest('.list-item');
-      var vals = JSON.parse(item.dataset.val || '{}');
-      vals.id = item.dataset.id;
-      crudModal({ title: 'Editar campo', fields: [{ key: 'id', label: 'ID', type: 'text' }].concat(FIELDS), onSave: save }, vals);
-      document.querySelector('#modalCrudDyn [data-k="id"]').closest('.field').style.display = 'none';
+      var id = b.closest('.list-item').dataset.id;
+      api('/content/fields/get?id=' + id).then(function (j) {
+        if (!j.ok || !j.row) return;
+        j.row.id = id;
+        crudModal({ title: 'Editar campo', fields: [{ key: 'id', label: 'ID', type: 'text' }].concat(FIELDS), onSave: save }, j.row);
+        document.querySelector('#modalCrudDyn [data-k="id"]').closest('.field').style.display = 'none';
+      });
     });
   });
   document.querySelectorAll('.f-toggle').forEach(function (t) {

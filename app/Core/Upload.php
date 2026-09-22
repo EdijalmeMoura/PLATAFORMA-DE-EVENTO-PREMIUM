@@ -19,17 +19,24 @@ class Upload {
         if (!isset(self::ALLOWED[$ext])) {
             return [false, 'Formato não permitido. Use JPG, PNG, WEBP, GIF ou SVG.'];
         }
-        $finfo = new \finfo(FILEINFO_MIME_TYPE);
-        $mime = $finfo->file($file['tmp_name']);
-        if ($mime !== self::ALLOWED[$ext] && !($ext === 'jpg' && $mime === 'image/jpeg')) {
+        $mime = null;
+        if (class_exists('finfo')) {
+            $finfo = new \finfo(FILEINFO_MIME_TYPE);
+            $mime = $finfo->file($file['tmp_name']);
+        }
+        if ($mime && $mime !== self::ALLOWED[$ext] && !($ext === 'jpg' && $mime === 'image/jpeg')) {
             // SVG pode variar; valida conteúdo básico
             if ($ext !== 'svg' || stripos($mime, 'svg') === false && $mime !== 'text/xml' && $mime !== 'text/plain') {
                 return [false, 'Arquivo inválido.'];
             }
         }
         if ($ext === 'svg') {
+            // SVG roda no mesmo domínio: bloqueia scripts, eventos e conteúdo embutido
             $content = file_get_contents($file['tmp_name']);
-            if (preg_match('#<\s*script#i', $content)) return [false, 'SVG com conteúdo bloqueado.'];
+            if (!is_string($content) || $content === '') return [false, 'Arquivo inválido.'];
+            if (preg_match('#<\s*script|on[a-z]+\s*=|<\s*foreignobject|<\s*iframe|<\s*embed|<\s*object#i', $content)) {
+                return [false, 'SVG com conteúdo bloqueado por segurança.'];
+            }
         }
         $folder = preg_replace('/[^a-z0-9_-]/i', '', $folder) ?: 'general';
         $dir = APP_ROOT . '/uploads/' . $folder;

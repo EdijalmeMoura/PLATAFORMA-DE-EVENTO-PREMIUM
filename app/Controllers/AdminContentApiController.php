@@ -58,6 +58,14 @@ class AdminContentApiController {
         if (empty($data['name'] ?? Event::current()['name'])) {
             json_response(['ok' => false, 'error' => 'Nome do evento é obrigatório.'], 422);
         }
+        foreach (['date_start', 'date_end'] as $dk) {
+            if (!empty($data[$dk]) && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $data[$dk])) {
+                json_response(['ok' => false, 'error' => 'Data inválida (use AAAA-MM-DD).'], 422);
+            }
+        }
+        if (!empty($data['date_start']) && !empty($data['date_end']) && $data['date_end'] < $data['date_start']) {
+            json_response(['ok' => false, 'error' => 'A data de término deve ser depois do início.'], 422);
+        }
         // datetime-local (2026-10-08T08:00) → DATETIME do banco
         if (!empty($data['countdown_target'])) {
             $data['countdown_target'] = str_replace('T', ' ', $data['countdown_target']);
@@ -71,13 +79,13 @@ class AdminContentApiController {
 
     private static function contentSave() {
         $input = array_merge($_POST, json_input());
-        $section = preg_replace('/[^a-z_]/', '', $input['section'] ?? '');
+        $section = preg_replace('/[^a-z0-9_]/', '', $input['section'] ?? '');
         $values = $input['values'] ?? [];
         if ($section === '' || !is_array($values)) json_response(['ok' => false, 'error' => 'Dados inválidos.'], 422);
         $allowedSections = ['hero', 'countdown', 'about', 'experience', 'awards', 'schedule', 'speakers', 'venue', 'tickets', 'faq', 'register', 'cta_final', 'footer', 'legal', 'theme'];
         if (!in_array($section, $allowedSections, true)) json_response(['ok' => false, 'error' => 'Seção inválida.'], 422);
         foreach ($values as $k => $v) {
-            $k = preg_replace('/[^a-z_]/', '', (string) $k);
+            $k = preg_replace('/[^a-z0-9_]/', '', (string) $k);
             if ($k === '') continue;
             if ($section === 'legal' && in_array($k, ['terms', 'privacy'], true)) {
                 $v = self::sanitizeHtml($v);
@@ -93,8 +101,10 @@ class AdminContentApiController {
     private static function sanitizeHtml($html) {
         $allowed = '<p><br><strong><b><em><i><u><ul><ol><li><h3><h4><a>';
         $html = strip_tags((string) $html, $allowed);
-        // Remove javascript: dos links
-        $html = preg_replace('#(<a[^>]+href=["\'])\s*javascript:[^"\']*(["\'])#i', '$1#$2', $html);
+        // strip_tags mantem atributos: remove manipuladores on* (onclick, onload...)
+        $html = preg_replace('#\s+on[a-z]+\s*=\s*("[^"]*"|\'[^\']*\'|[^\s>]+)#i', '', $html);
+        // Bloqueia javascript:, data: e vbscript: nos links
+        $html = preg_replace('#(<a[^>]+href=["\'])\s*(javascript|data|vbscript):[^"\']*(["\'])#i', '$1#$3', $html);
         return $html;
     }
 
@@ -128,6 +138,17 @@ class AdminContentApiController {
             if ($table === 'ticket_types' && isset($data['status']) && !in_array($data['status'], ['ACTIVE', 'PAUSED', 'SOLD_OUT'], true)) {
                 $data['status'] = 'ACTIVE';
             }
+            if ($table === 'ticket_types' && !empty($data['sale_start']) && !empty($data['sale_end']) && $data['sale_end'] < $data['sale_start']) {
+                json_response(['ok' => false, 'error' => 'O fim das vendas deve ser depois do início.'], 422);
+            }
+            // Troca de imagem: apaga o arquivo antigo (evita órfãos em uploads/)
+            $imgCol = $table === 'schedule_items' ? 'image' : ($table === 'speakers' ? 'photo' : null);
+            if ($id > 0 && $imgCol && array_key_exists($imgCol, $data) && $data[$imgCol]) {
+                $oldRow = Database::fetch('SELECT ' . $imgCol . ' FROM ' . Database::table($table) . ' WHERE id = ? AND event_id = ?', [$id, $E]);
+                if ($oldRow && !empty($oldRow[$imgCol]) && $oldRow[$imgCol] !== $data[$imgCol]) {
+                    Upload::delete($oldRow[$imgCol]);
+                }
+            }
             if ($id > 0) {
                 unset($data['event_id']);
                 Database::update($table, $data, 'id = :id AND event_id = :e', ['id' => $id, 'e' => $E]);
@@ -160,14 +181,17 @@ class AdminContentApiController {
     }
 
     private static function parseMoney($v) {
-        $v = trim((string) $v);
+        $v = trim(str_replace(' ', '', (string) $v));
         if ($v === '') return 0;
-        // Aceita "1.234,56" ou "1234.56"
-        if (preg_match('/,\d{1,2}$/', $v)) {
+        // "1.234,56" (BR) → 1234.56
+        if (strpos($v, ',') !== false) {
             $v = str_replace('.', '', $v);
             $v = str_replace(',', '.', $v);
+        } elseif (preg_match('/\.\d{3}$/', $v)) {
+            // "1.200" (milhar BR sem centavos) → 1200
+            $v = str_replace('.', '', $v);
         }
-        return round((float) $v, 2);
+        return round(max(0, (float) $v), 2);
     }
 
     /** Campos do formulário */
@@ -192,6 +216,12 @@ class AdminContentApiController {
                 'section' => in_array($input['section'] ?? '', ['personal', 'address', 'extra'], true) ? $input['section'] : 'extra',
             ];
             if ($id > 0) {
+                $existing = Database::fetch('SELECT map_column FROM ' . Database::table('registration_fields') . ' WHERE id = ? AND event_id = ?', [$id, $E]);
+                // Nome e e-mail são exigidos pelo motor de inscrição: nunca desativar
+                if ($existing && in_array($existing['map_column'], ['name', 'email'], true)) {
+                    $data['active'] = 1;
+                    $data['required'] = 1;
+                }
                 Database::update('registration_fields', $data, 'id = :id AND event_id = :e', ['id' => $id, 'e' => $E]);
                 Audit::log(Auth::id(), 'field_update', 'registration_fields', $id);
             } else {
@@ -217,10 +247,17 @@ class AdminContentApiController {
         }
         if ($op === 'toggle') {
             $id = (int) ($input['id'] ?? 0);
-            $row = Database::fetch('SELECT active FROM ' . Database::table('registration_fields') . ' WHERE id = ? AND event_id = ?', [$id, $E]);
+            $row = Database::fetch('SELECT active, map_column FROM ' . Database::table('registration_fields') . ' WHERE id = ? AND event_id = ?', [$id, $E]);
             if (!$row) json_response(['ok' => false], 404);
+            if ($row['active'] && in_array($row['map_column'], ['name', 'email'], true)) {
+                json_response(['ok' => false, 'error' => 'Nome e e-mail são obrigatórios para a inscrição e não podem ser desativados.'], 422);
+            }
             Database::update('registration_fields', ['active' => $row['active'] ? 0 : 1], 'id = :id', ['id' => $id]);
             json_response(['ok' => true, 'active' => !$row['active']]);
+        }
+        if ($op === 'get') {
+            $row = Database::fetch('SELECT * FROM ' . Database::table('registration_fields') . ' WHERE id = ? AND event_id = ?', [(int) ($_GET['id'] ?? 0), $E]);
+            json_response(['ok' => (bool) $row, 'row' => $row]);
         }
         json_response(['ok' => false, 'error' => 'Operação inválida.'], 404);
     }
