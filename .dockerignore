@@ -1,0 +1,11 @@
+.git/
+.gitignore
+arena/
+storage/*.sqlite
+storage/*.sqlite-*
+storage/.key
+storage/installed.lock
+storage/logs/
+uploads/*
+!uploads/.gitkeep
+node_modules/

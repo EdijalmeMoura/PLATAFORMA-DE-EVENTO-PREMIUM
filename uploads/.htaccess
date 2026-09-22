@@ -1,0 +1,17 @@
+# Bloqueia execução de scripts na pasta de uploads
+<FilesMatch "\.(php|phtml|phar|cgi|pl|py|sh)$">
+  Require all denied
+</FilesMatch>
+# Remove handler PHP (vale p/ mod_php e php-fpm; php_flag quebraria no fpm)
+RemoveHandler .php .phtml .phar
+RemoveType .php .phtml .phar
+# Desliga o motor PHP somente onde o módulo existir
+<IfModule mod_php.c>
+  php_flag engine off
+</IfModule>
+<IfModule mod_php7.c>
+  php_flag engine off
+</IfModule>
+<IfModule mod_php8.c>
+  php_flag engine off
+</IfModule>
