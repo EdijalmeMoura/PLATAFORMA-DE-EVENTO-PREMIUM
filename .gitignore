@@ -17,6 +17,3 @@ uploads/*
 .DS_Store
 Thumbs.db
 *.log
-
-# Preview local (gerado)
-preview.html
