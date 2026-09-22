@@ -78,8 +78,11 @@ $envUrl = rtrim(env('APP_URL', ''), '/');
 if ($envUrl !== '') {
     define('APP_URL', $envUrl);
 } else {
-    $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (($_SERVER['SERVER_PORT'] ?? 80) == 443);
-    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+        || (($_SERVER['SERVER_PORT'] ?? 80) == 443)
+        || strtolower($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https';
+    // Host vindo do cabeçalho: permite só caracteres válidos (anti host-injection)
+    $host = preg_replace('/[^A-Za-z0-9.\-:\[\]]/', '', $_SERVER['HTTP_HOST'] ?? '') ?: 'localhost';
     define('APP_URL', ($https ? 'https://' : 'http://') . $host . BASE_PATH);
 }
 

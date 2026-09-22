@@ -8,7 +8,7 @@ require __DIR__ . '/config/config.php';
 use App\Core\Database;
 use App\Core\Seed;
 
-if (is_file(APP_ROOT . '/storage/installed.lock') && empty($_GET['force'])) {
+if (is_file(APP_ROOT . '/storage/installed.lock') && !install_force_ok()) {
     http_response_code(403);
     echo '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"><title>Instalação</title></head>'
         . '<body style="font-family:sans-serif;background:#080808;color:#e5e5e5;padding:60px;text-align:center;">'
@@ -19,22 +19,34 @@ if (is_file(APP_ROOT . '/storage/installed.lock') && empty($_GET['force'])) {
     exit;
 }
 
+/**
+ * Reinstalação exige o token do cron (?force=TOKEN) — sem isso,
+ * qualquer visitante criaria um admin na instalação existente.
+ */
+function install_force_ok() {
+    $f = $_GET['force'] ?? '';
+    return $f !== '' && CRON_TOKEN !== '' && hash_equals(CRON_TOKEN, (string) $f);
+}
+
 $step = $_GET['step'] ?? '1';
 $error = '';
 $notice = '';
 
 // ---------- Requisitos ----------
+// Obrigatórios (bloqueiam) vs recomendados (avisam, a plataforma degrada com elegância)
 $reqs = [
     'PHP 7.4 ou superior' => version_compare(PHP_VERSION, '7.4.0', '>='),
     'Extensão PDO' => extension_loaded('pdo'),
     'PDO SQLite ou MySQL' => extension_loaded('pdo_sqlite') || extension_loaded('pdo_mysql'),
     'mbstring' => extension_loaded('mbstring'),
-    'openssl' => extension_loaded('openssl'),
-    'curl' => extension_loaded('curl'),
+    'openssl (criptografia)' => extension_loaded('openssl'),
     'json' => extension_loaded('json'),
-    'fileinfo' => extension_loaded('fileinfo'),
     'Pasta storage/ gravável' => is_writable(APP_ROOT . '/storage') || @mkdir(APP_ROOT . '/storage', 0755, true),
     'Pasta uploads/ gravável' => is_writable(APP_ROOT . '/uploads') || @mkdir(APP_ROOT . '/uploads', 0755, true),
+];
+$recs = [
+    'curl (envio WhatsApp)' => extension_loaded('curl'),
+    'fileinfo (validação de imagens)' => extension_loaded('fileinfo'),
 ];
 @mkdir(APP_ROOT . '/storage/logs', 0755, true);
 @mkdir(APP_ROOT . '/uploads/general', 0755, true);
@@ -67,8 +79,9 @@ function write_env(array $pairs) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'save_db') {
     $driver = ($_POST['db_driver'] ?? 'sqlite') === 'mysql' ? 'mysql' : 'sqlite';
     $pairs = ['DB_DRIVER' => $driver];
-    $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off');
-    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
+        || strtolower($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https';
+    $host = preg_replace('/[^A-Za-z0-9.\-:\[\]]/', '', $_SERVER['HTTP_HOST'] ?? '') ?: 'localhost';
     $pairs['APP_URL'] = ($https ? 'https://' : 'http://') . $host . BASE_PATH;
     if (empty(env('APP_KEY', ''))) $pairs['APP_KEY'] = bin2hex(random_bytes(24));
     if (empty(env('CRON_TOKEN', '')) || env('CRON_TOKEN') === 'troque-este-token-aqui') {
@@ -79,10 +92,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['action'] ?? '') === 'save_
             $pairs[$ek] = trim($_POST[$pk] ?? '');
         }
         $pairs['DB_PASS'] = $_POST['pass'] ?? '';
-        // Testa conexão
+        // Testa conexão (timeout curto p/ host inalcançável não travar a página)
         try {
             $dsn = 'mysql:host=' . $pairs['DB_HOST'] . ';port=' . ($pairs['DB_PORT'] ?: '3306') . ';dbname=' . $pairs['DB_NAME'] . ';charset=utf8mb4';
-            new PDO($dsn, $pairs['DB_USER'], $pairs['DB_PASS'], [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+            new PDO($dsn, $pairs['DB_USER'], $pairs['DB_PASS'], [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_TIMEOUT => 5]);
         } catch (PDOException $ex) {
             $error = 'Falha na conexão MySQL: ' . $ex->getMessage();
         }
@@ -166,6 +179,10 @@ if (isset($_GET['step']) && $_GET['step'] === 'done') $step = 'done';
     <?php foreach ($reqs as $label => $ok): ?>
       <div class="req"><span><?= e($label) ?></span><span class="<?= $ok ? 'ok' : 'fail' ?>"><?= $ok ? '● OK' : '● FALHOU' ?></span></div>
     <?php endforeach; ?>
+    <h3 style="font-size:14px;color:#C9A227;letter-spacing:2px;margin-top:18px;">RECOMENDADOS (NÃO BLOQUEIAM)</h3>
+    <?php foreach ($recs as $label => $ok): ?>
+      <div class="req"><span><?= e($label) ?></span><span class="<?= $ok ? 'ok' : 'fail' ?>"><?= $ok ? '● OK' : '● AUSENTE — recurso degradado' ?></span></div>
+    <?php endforeach; ?>
     <p style="font-size:12px;color:#777;">PHP atual: <?= e(PHP_VERSION) ?></p>
     <form method="post">
       <input type="hidden" name="action" value="save_db">
@@ -204,6 +221,7 @@ if (isset($_GET['step']) && $_GET['step'] === 'done') $step = 'done';
       <div style="font-size:52px;">✓</div>
       <h2 style="font-family:Georgia,serif;font-weight:500;">Instalação concluída</h2>
       <p style="color:#888;font-size:14px;">Sua plataforma está pronta. Acesse o painel e personalize o evento.</p>
+      <p style="color:#E7C766;font-size:13px;">⚠ Por segurança, apague o arquivo <code>install.php</code> do servidor.</p>
       <a href="<?= e(url('admin/login')) ?>" class="btn" style="display:inline-block;width:auto;padding:14px 42px;text-decoration:none;">ACESSAR O PAINEL</a>
       <p style="margin-top:18px;font-size:13px;"><a href="<?= e(url('')) ?>">Ver a landing page →</a></p>
     </div>
