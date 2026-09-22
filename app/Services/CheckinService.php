@@ -42,12 +42,17 @@ class CheckinService {
         $v = self::validate($eventId, $input);
         if ($v['state'] !== 'VALID') return $v;
         $reg = $v['registration'];
-        Database::update('registrations', [
+        // UPDATE condicional = atômico: 2 portarias simultâneas não duplicam
+        $affected = Database::update('registrations', [
             'status' => 'CHECKED_IN',
             'checked_in_at' => now(),
             'checked_in_by' => $userId,
             'updated_at' => now(),
-        ], 'id = :id', ['id' => (int) $reg['id']]);
+        ], 'id = :id AND status != :st', ['id' => (int) $reg['id'], 'st' => 'CHECKED_IN']);
+        if ($affected === 0) {
+            // Outro operador confirmou entre a validação e o update
+            return self::validate($eventId, $input);
+        }
         Database::insert('checkins', [
             'registration_id' => (int) $reg['id'],
             'checked_in_at' => now(),

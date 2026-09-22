@@ -14,9 +14,12 @@
     }).catch(function () {});
   }
 
+  var audioCtx = null;
   function beep(ok) {
     try {
-      var ctx = new (window.AudioContext || window.webkitAudioContext)();
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      var ctx = audioCtx;
       var o = ctx.createOscillator(), g = ctx.createGain();
       o.connect(g); g.connect(ctx.destination);
       o.frequency.value = ok ? 880 : 220;
@@ -24,6 +27,11 @@
       g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
       o.stop(ctx.currentTime + 0.4);
     } catch (e) { /* sem áudio */ }
+  }
+
+  function fmtDT(s) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/.exec(s || '');
+    return m ? m[3] + '/' + m[2] + '/' + m[1] + ' ' + m[4] + ':' + m[5] : (s || '');
   }
 
   function show(state, reg) {
@@ -36,13 +44,14 @@
       ALREADY_USED: '⚠ JÁ UTILIZADO',
       CANCELLED: '✕ INSCRIÇÃO CANCELADA',
       NOT_FOUND: '✕ CÓDIGO NÃO ENCONTRADO',
+      OFFLINE: '⚠ SEM CONEXÃO — TENTE NOVAMENTE',
     };
     var html = '<div class="big">' + (titles[state] || state) + '</div>';
     if (reg) {
       html += '<div style="font-size:18px;font-weight:700;">' + esc(reg.name) + '</div>' +
         '<div style="color:var(--ad-muted);font-size:13.5px;margin-top:4px;">' + esc(reg.code) + ' · ' + esc(reg.ticket || '') + '</div>' +
         (reg.company ? '<div style="color:var(--ad-muted);font-size:13px;">' + esc(reg.company) + '</div>' : '') +
-        (reg.checked_in_at ? '<div style="color:var(--ad-muted);font-size:12.5px;margin-top:6px;">Check-in anterior: ' + esc(reg.checked_in_at) + '</div>' : '');
+        (reg.checked_in_at ? '<div style="color:var(--ad-muted);font-size:12.5px;margin-top:6px;">Check-in anterior: ' + esc(fmtDT(reg.checked_in_at)) + '</div>' : '');
     }
     resultBox.innerHTML = html;
     beep(state === 'VALID');
@@ -53,7 +62,10 @@
     apiPost('/checkin-confirm', { code: code, method: method || 'manual' }).then(function (j) {
       show(j.state || 'NOT_FOUND', j.registration);
       refreshStats();
-    }).catch(function () {});
+    }).catch(function (e) {
+      if (e && e.message === 'auth') return; // sessão expirada: api() já redireciona
+      show('OFFLINE', null);
+    });
   }
 
   // Scanner
@@ -82,7 +94,10 @@
   }
   function stop() {
     if (reader && scanning) {
-      reader.stop().then(function () { scanning = false; }).catch(function () { scanning = false; });
+      scanning = false;
+      reader.stop().then(function () {
+        if (reader.clear) reader.clear();
+      }).catch(function () {});
     }
   }
   if (btnStart) btnStart.addEventListener('click', start);
