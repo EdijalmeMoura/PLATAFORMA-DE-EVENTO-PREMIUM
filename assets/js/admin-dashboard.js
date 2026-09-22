@@ -17,8 +17,10 @@
     if (!j.ok) return;
     var d = j.data;
     var hasChart = typeof Chart !== 'undefined';
-    Chart.defaults && (Chart.defaults.color = '#9a9a9a');
-    Chart.defaults && (Chart.defaults.borderColor = 'rgba(255,255,255,.07)');
+    if (hasChart) {
+      Chart.defaults.color = '#9a9a9a';
+      Chart.defaults.borderColor = 'rgba(255,255,255,.07)';
+    }
 
     // Por dia
     var dayLabels = d.per_day.map(function (r) {

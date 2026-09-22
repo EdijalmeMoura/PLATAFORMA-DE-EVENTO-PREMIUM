@@ -58,6 +58,11 @@ class AdminContentApiController {
         if (empty($data['name'] ?? Event::current()['name'])) {
             json_response(['ok' => false, 'error' => 'Nome do evento é obrigatório.'], 422);
         }
+        // datetime-local (2026-10-08T08:00) → DATETIME do banco
+        if (!empty($data['countdown_target'])) {
+            $data['countdown_target'] = str_replace('T', ' ', $data['countdown_target']);
+            if (strlen($data['countdown_target']) === 16) $data['countdown_target'] .= ':00';
+        }
         $data['updated_at'] = now();
         Database::update('events', $data, 'id = :id', ['id' => $E]);
         Audit::log(Auth::id(), 'event_update', 'events', $E);
@@ -113,6 +118,10 @@ class AdminContentApiController {
                     $v = is_string($input[$col]) ? trim($input[$col]) : $input[$col];
                     if ($col === 'price') $v = self::parseMoney($input[$col]);
                     if ($col === 'quantity') $v = max(0, (int) $input[$col]);
+                    if (in_array($col, ['sale_start', 'sale_end'], true) && is_string($v) && $v !== '') {
+                        $v = str_replace('T', ' ', $v);
+                        if (strlen($v) === 16) $v .= ':00';
+                    }
                     $data[$col] = ($v === '' && !in_array($col, ['price', 'quantity'], true)) ? null : $v;
                 }
             }

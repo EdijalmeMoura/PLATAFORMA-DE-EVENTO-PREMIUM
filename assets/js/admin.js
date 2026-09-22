@@ -126,6 +126,43 @@
     });
   });
 
+  // Busca global → página de inscritos
+  var gs = document.getElementById('globalSearch');
+  if (gs) gs.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && gs.value.trim() !== '') {
+      window.location.href = window.ADMIN.base + 'admin/inscricoes?q=' + encodeURIComponent(gs.value.trim());
+    }
+  });
+
+  // Notificações
+  var btnNotif = document.getElementById('btnNotif');
+  var notifDrop = document.getElementById('notifDrop');
+  function loadNotif() {
+    api('/notifications', { silent: true }).then(function (j) {
+      if (!j.ok) return;
+      var badge = document.getElementById('notifBadge');
+      if (j.alerts > 0) {
+        badge.style.display = 'flex';
+        badge.textContent = j.alerts > 9 ? '9+' : j.alerts;
+      } else badge.style.display = 'none';
+      document.getElementById('notifList').innerHTML = j.items.map(function (it) {
+        return '<a class="notif-item ' + (it.cls || '') + '" href="' + window.ADMIN.base + it.link + '"><span>•</span><span>' + esc(it.text) + '</span></a>';
+      }).join('');
+    }).catch(function () {});
+  }
+  if (btnNotif) {
+    btnNotif.addEventListener('click', function (e) {
+      e.stopPropagation();
+      notifDrop.classList.toggle('open');
+      if (notifDrop.classList.contains('open')) loadNotif();
+    });
+    document.addEventListener('click', function (e) {
+      if (!notifDrop.contains(e.target)) notifDrop.classList.remove('open');
+    });
+    loadNotif();
+    setInterval(loadNotif, 120000);
+  }
+
   // Copiar texto
   window.copyText = function (txt, msg) {
     function done() { toast(msg || 'Copiado!', 'ok'); }

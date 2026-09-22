@@ -57,6 +57,24 @@ class Auth {
         return $u && $u['role_slug'] === 'admin';
     }
 
+    /** Catálogo de permissões (chave => rótulo). */
+    public static function allPermissions() {
+        return [
+            'dashboard.view' => 'Ver dashboard',
+            'registrations.view' => 'Ver inscritos',
+            'registrations.edit' => 'Editar / cancelar inscritos',
+            'registrations.export' => 'Exportar inscritos',
+            'checkin.use' => 'Realizar check-in',
+            'comms.view' => 'Ver comunicação',
+            'comms.send' => 'Enviar mensagens e configurar canais',
+            'content.manage' => 'Gerenciar conteúdo do site',
+            'event.manage' => 'Configurações do evento',
+            'reports.view' => 'Ver relatórios',
+            'users.manage' => 'Gerenciar usuários e perfis',
+            'audit.view' => 'Ver auditoria',
+        ];
+    }
+
     /** Tenta login. Retorna [ok, message|user] */
     public static function attempt($email, $password) {
         $email = mb_strtolower(trim($email));

@@ -207,3 +207,27 @@ table.tbl{width:100%;border-collapse:collapse;font-size:13.8px;min-width:760px}
 .report-bar .fill{height:100%;background:linear-gradient(90deg,var(--ad-gold),var(--ad-gold-l));border-radius:999px;min-width:4px}
 .report-bar .val{width:52px;text-align:right;color:var(--ad-muted);font-weight:700}
 @media print{.side,.top,.toolbar,.no-print{display:none!important}.content{padding:0}body{background:#fff;color:#111}}
+
+/* ---------- Busca global + notificações ---------- */
+.top-search{position:relative}
+.top-search .ic{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--ad-dim)}
+.top-search input{background:#0b0b0b;border:1px solid #2a2a2a;color:#fff;border-radius:999px;padding:9px 16px 9px 34px;font-size:13px;width:230px;transition:.25s}
+.top-search input:focus{outline:none;border-color:var(--ad-gold);width:280px}
+@media(max-width:760px){.top-search{display:none}}
+.notif-wrap{position:relative}
+.notif-badge{position:absolute;top:-6px;right:-6px;min-width:19px;height:19px;border-radius:999px;background:var(--ad-red);color:#fff;font-size:10.5px;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 5px}
+.notif-drop{position:absolute;right:0;top:calc(100% + 12px);width:330px;max-width:86vw;background:#161616;border:1px solid var(--ad-line-gold);border-radius:14px;box-shadow:0 24px 70px rgba(0,0,0,.7);display:none;z-index:90;overflow:hidden}
+.notif-drop.open{display:block;animation:popIn .25s}
+.notif-head{padding:13px 18px;font-size:12px;letter-spacing:2px;font-weight:700;color:var(--ad-gold-l);border-bottom:1px solid var(--ad-line)}
+.notif-item{display:flex;gap:11px;align-items:flex-start;padding:13px 18px;border-bottom:1px solid rgba(255,255,255,.05);font-size:13.5px;color:#ddd}
+.notif-item:last-child{border:0}
+.notif-item:hover{background:rgba(201,162,39,.06)}
+.notif-item .ic{width:18px;height:18px;margin-top:2px;color:var(--ad-gold-l)}
+.notif-item.err .ic{color:var(--ad-red)}
+.notif-item.ok .ic{color:var(--ad-green)}
+
+/* ---------- Permissões ---------- */
+.perm-grid{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));margin:12px 0 16px}
+.perm{display:flex;gap:10px;align-items:center;background:#0e0e0e;border:1px solid var(--ad-line);border-radius:10px;padding:10px 13px;font-size:13.5px;cursor:pointer}
+.perm:hover{border-color:var(--ad-line-gold)}
+.perm input{width:16px;height:16px;accent-color:#C9A227}

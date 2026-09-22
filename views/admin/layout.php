@@ -65,6 +65,16 @@ $initial = mb_strtoupper(mb_substr(trim($u['name'] ?? 'A'), 0, 1));
         <span><?= e(greeting()) ?>, <?= e(strtok($u['name'] ?? '', ' ')) ?> · <?= e($u['role_name'] ?? '') ?></span>
       </div>
       <div class="top-actions">
+        <?php if ($can('registrations.view')): ?>
+        <div class="top-search"><?= Icons::get('search') ?><input id="globalSearch" placeholder="Buscar inscrito…" autocomplete="off"></div>
+        <?php endif; ?>
+        <div class="notif-wrap">
+          <button class="icon-btn notif-btn" id="btnNotif" title="Notificações" style="position:relative;"><?= Icons::get('bell') ?><span class="notif-badge" id="notifBadge" style="display:none;">0</span></button>
+          <div class="notif-drop" id="notifDrop">
+            <div class="notif-head">Notificações</div>
+            <div id="notifList"><div class="empty" style="padding:24px;">Carregando…</div></div>
+          </div>
+        </div>
         <button class="user-chip" id="userChip" title="Meu perfil">
           <span class="avatar"><?= e($initial) ?></span>
           <span class="user-chip-tx"><strong><?= e(strtok($u['name'] ?? '', ' ')) ?></strong><small><?= e($u['role_name'] ?? '') ?></small></span>

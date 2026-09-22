@@ -15,7 +15,7 @@ class StatsService {
         $pending = (int) Database::fetchColumn("SELECT COUNT(*) FROM $t WHERE event_id = ? AND status = 'PENDING'", [$E]);
         $cancelled = (int) Database::fetchColumn("SELECT COUNT(*) FROM $t WHERE event_id = ? AND status = 'CANCELLED'", [$E]);
         $checkins = (int) Database::fetchColumn("SELECT COUNT(*) FROM $t WHERE event_id = ? AND status = 'CHECKED_IN'", [$E]);
-        $today = (int) Database::fetchColumn("SELECT COUNT(*) FROM $t WHERE event_id = ? AND DATE(created_at) = DATE('now')" . (Database::driver() === 'mysql' ? '' : ''), [$E]);
+        $today = (int) Database::fetchColumn("SELECT COUNT(*) FROM $t WHERE event_id = ? AND DATE(created_at) = DATE('now','localtime')", [$E]);
         if (Database::driver() === 'mysql') {
             $today = (int) Database::fetchColumn("SELECT COUNT(*) FROM $t WHERE event_id = ? AND DATE(created_at) = CURDATE()", [$E]);
         }
@@ -50,7 +50,7 @@ class StatsService {
             );
         }
         return Database::fetchAll(
-            "SELECT DATE(created_at) d, COUNT(*) c FROM $t WHERE event_id = ? AND status != 'CANCELLED' AND DATE(created_at) >= DATE('now','-$days days') GROUP BY DATE(created_at) ORDER BY d",
+            "SELECT DATE(created_at) d, COUNT(*) c FROM $t WHERE event_id = ? AND status != 'CANCELLED' AND DATE(created_at) >= DATE('now','localtime','-$days days') GROUP BY DATE(created_at) ORDER BY d",
             [(int) $eventId]
         );
     }

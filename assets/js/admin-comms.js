@@ -106,9 +106,6 @@
   });
 
   // ---- CRUD mensagens / templates ----
-  function bindCrud(listSel, itemSel, kind, title) {
-    document.querySelectorAll(itemSel + ' .msg-edit, ' + itemSel + ' .tpl-edit').forEach(function (b) { /* noop */ });
-  }
   function openEditor(kind, title, id) {
     document.getElementById('mm-kind').value = kind;
     document.getElementById('mm-title').textContent = title;

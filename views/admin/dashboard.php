@@ -78,6 +78,20 @@ $extra_js = '<script src="' . e(url('assets/js/admin-dashboard.js')) . '?v=1.0.0
   </div>
 </div>
 
+<?php $sp = $setup ?? []; ?>
+<div class="card" style="margin-bottom:16px;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+    <div><h3>Status das integrações</h3><p class="card-sub">Pendências para tudo funcionar</p></div>
+    <a href="<?= e(url('admin/comunicacao')) ?>" class="btn-ad btn-ghost-ad btn-sm-ad">Abrir comunicação</a>
+  </div>
+  <div style="display:flex;flex-wrap:wrap;gap:10px;">
+    <?= !empty($sp['smtp']) ? '<span class="badge b-green">● SMTP ativo</span>' : '<span class="badge b-red">● SMTP não configurado</span>' ?>
+    <?= !empty($sp['whatsapp']) ? '<span class="badge b-green">● WhatsApp conectado</span>' : '<span class="badge b-gray">● WhatsApp desconectado</span>' ?>
+    <?= ($sp['queue_pending'] ?? 0) > 0 ? '<span class="badge b-amber">● ' . (int) $sp['queue_pending'] . ' na fila</span>' : '<span class="badge b-gray">● Fila vazia</span>' ?>
+    <?= ($sp['queue_failed'] ?? 0) > 0 ? '<span class="badge b-red">● ' . (int) $sp['queue_failed'] . ' falhas de envio</span>' : '' ?>
+  </div>
+</div>
+
 <div class="grid g2">
   <div class="card">
     <h3>Origem das inscrições</h3>

@@ -44,6 +44,15 @@ class AdminController {
 
     public static function dashboard() {
         $E = Event::id();
+        $em = Database::fetch('SELECT active, host FROM ' . Database::table('email_settings') . ' WHERE event_id = ?', [$E]);
+        $wa = Database::fetch('SELECT active, phone_number_id, business_number FROM ' . Database::table('whatsapp_settings') . ' WHERE event_id = ?', [$E]);
+        $qt = Database::table('message_queue');
+        $setup = [
+            'smtp' => ($em && (int) $em['active'] === 1 && $em['host']) ? true : false,
+            'whatsapp' => ($wa && (int) $wa['active'] === 1 && $wa['phone_number_id']) ? true : false,
+            'queue_pending' => (int) Database::fetchColumn("SELECT COUNT(*) FROM $qt WHERE event_id = ? AND status IN ('queued','processing')", [$E]),
+            'queue_failed' => (int) Database::fetchColumn("SELECT COUNT(*) FROM $qt WHERE event_id = ? AND status = 'failed'", [$E]),
+        ];
         self::page('dashboard', [
             'page' => 'dashboard',
             'page_title' => 'Dashboard',
@@ -52,6 +61,7 @@ class AdminController {
             'per_ticket' => StatsService::perTicket($E),
             'comms' => StatsService::comms($E),
             'checkin' => CheckinService::stats($E),
+            'setup' => $setup,
         ]);
     }
 

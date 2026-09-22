@@ -58,6 +58,15 @@ class AdminApiController {
                 Csrf::requireValid();
                 self::users($parts[1] ?? '', $method);
                 break;
+            case 'roles':
+                Auth::requireCan('users.manage');
+                Csrf::requireValid();
+                self::roles();
+                break;
+            case 'notifications':
+                Auth::requireCan('dashboard.view');
+                self::notifications();
+                break;
             case 'profile':
                 Auth::requireLogin();
                 Csrf::requireValid();
@@ -305,6 +314,56 @@ class AdminApiController {
             json_response(['ok' => true]);
         }
         json_response(['ok' => false, 'error' => 'Ação inválida.'], 404);
+    }
+
+    // ---------- Perfis: permissões ----------
+    private static function roles() {
+        $input = array_merge($_POST, json_input());
+        $roleId = (int) ($input['role_id'] ?? 0);
+        $role = Database::fetch('SELECT * FROM ' . Database::table('roles') . ' WHERE id = ?', [$roleId]);
+        if (!$role) json_response(['ok' => false, 'error' => 'Perfil não encontrado.'], 404);
+        if ($role['slug'] === 'admin') {
+            json_response(['ok' => false, 'error' => 'O perfil Administrador sempre tem acesso total.'], 422);
+        }
+        $valid = array_keys(Auth::allPermissions());
+        $perms = array_values(array_intersect((array) ($input['permissions'] ?? []), $valid));
+        Database::update('roles', ['permissions' => json_encode($perms, JSON_UNESCAPED_UNICODE)], 'id = :id', ['id' => $roleId]);
+        Audit::log(Auth::id(), 'role_permissions', 'roles', $roleId, ['permissions' => $perms]);
+        json_response(['ok' => true]);
+    }
+
+    // ---------- Notificações ----------
+    private static function notifications() {
+        $E = Event::id();
+        $items = [];
+        $alerts = 0;
+        $q = Database::table('message_queue');
+        $failed = (int) Database::fetchColumn("SELECT COUNT(*) FROM $q WHERE event_id = ? AND status = 'failed'", [$E]);
+        $queued = (int) Database::fetchColumn("SELECT COUNT(*) FROM $q WHERE event_id = ? AND status IN ('queued','processing')", [$E]);
+        if ($failed > 0) {
+            $alerts++;
+            $items[] = ['icon' => 'alert', 'cls' => 'err', 'text' => $failed . ' mensagem(ns) falharam na fila.', 'link' => 'admin/comunicacao'];
+        }
+        if ($queued > 0) {
+            $items[] = ['icon' => 'clock', 'cls' => '', 'text' => $queued . ' mensagem(ns) aguardando na fila.', 'link' => 'admin/comunicacao'];
+        }
+        $today = StatsService::overview($E);
+        if (($today['today'] ?? 0) > 0) {
+            $items[] = ['icon' => 'users', 'cls' => 'ok', 'text' => $today['today'] . ' nova(s) inscrição(ões) hoje.', 'link' => 'admin/inscricoes'];
+        }
+        $em = Database::fetch('SELECT active, host FROM ' . Database::table('email_settings') . ' WHERE event_id = ?', [$E]);
+        if (!$em || !(int) $em['active'] || !$em['host']) {
+            $alerts++;
+            $items[] = ['icon' => 'mail', 'cls' => 'err', 'text' => 'SMTP não configurado — e-mails não serão enviados.', 'link' => 'admin/comunicacao'];
+        }
+        $wa = Database::fetch('SELECT active, phone_number_id FROM ' . Database::table('whatsapp_settings') . ' WHERE event_id = ?', [$E]);
+        if (!$wa || !(int) $wa['active'] || !$wa['phone_number_id']) {
+            $items[] = ['icon' => 'whatsapp', 'cls' => '', 'text' => 'WhatsApp desconectado (opcional).', 'link' => 'admin/comunicacao'];
+        }
+        if (empty($items)) {
+            $items[] = ['icon' => 'check', 'cls' => 'ok', 'text' => 'Tudo certo! Nenhuma pendência.', 'link' => 'admin'];
+        }
+        json_response(['ok' => true, 'items' => $items, 'alerts' => $alerts, 'total' => count($items)]);
     }
 
     // ---------- Perfil próprio ----------

@@ -1,4 +1,6 @@
-<?php defined('APP') or exit; use App\Core\Auth; use App\Core\Icons; ?>
+<?php defined('APP') or exit; use App\Core\Auth; use App\Core\Icons;
+$allPerms = Auth::allPermissions();
+?>
 <div class="toolbar">
   <span style="color:var(--ad-muted);font-size:13.5px;">Equipe com acesso ao painel. Perfis: Administrador, Gestor, Credenciamento, Comunicação e Visualização.</span>
   <span class="spacer"></span>
@@ -25,6 +27,27 @@
       <?php endforeach; ?>
     </tbody>
   </table>
+</div>
+
+<div class="card" style="margin-top:16px;">
+  <h3>Perfis & permissões</h3>
+  <p class="card-sub">Marque o que cada perfil pode fazer. O Administrador sempre tem acesso total.</p>
+  <?php foreach ($roles as $role):
+    if ($role['slug'] === 'admin') continue;
+    $rp = json_decode($role['permissions'] ?? '[]', true) ?: [];
+  ?>
+  <div class="card" style="background:#0e0e0e;margin-bottom:12px;" data-role="<?= (int) $role['id'] ?>">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+      <strong style="font-size:14.5px;"><?= e($role['name']) ?></strong>
+      <button class="btn-ad btn-gold-ad btn-sm-ad role-save">Salvar permissões</button>
+    </div>
+    <div class="perm-grid">
+      <?php foreach ($allPerms as $pk => $pl): ?>
+      <label class="perm"><input type="checkbox" value="<?= e($pk) ?>" <?= in_array($pk, $rp, true) ? 'checked' : '' ?>> <?= e($pl) ?></label>
+      <?php endforeach; ?>
+    </div>
+  </div>
+  <?php endforeach; ?>
 </div>
 
 <div class="modal" id="modalUser">
@@ -82,6 +105,18 @@
       password: document.getElementById('mu-pass').value,
     }).then(function (j) {
       if (j.ok) { toast('Usuário salvo!', 'ok'); closeModal('modalUser'); setTimeout(function () { location.reload(); }, 600); }
+    });
+  });
+  document.querySelectorAll('.role-save').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var card = btn.closest('[data-role]');
+      var perms = [];
+      card.querySelectorAll('input[type="checkbox"]:checked').forEach(function (cb) { perms.push(cb.value); });
+      btn.disabled = true;
+      apiPost('/roles', { role_id: card.dataset.role, permissions: perms }).then(function (j) {
+        btn.disabled = false;
+        if (j.ok) toast('Permissões atualizadas!', 'ok');
+      }).catch(function () { btn.disabled = false; });
     });
   });
   document.querySelectorAll('.u-del').forEach(function (b) {

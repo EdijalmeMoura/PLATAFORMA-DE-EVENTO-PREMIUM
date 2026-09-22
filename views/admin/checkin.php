@@ -16,7 +16,7 @@ $extra_js = '<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.
   <div class="card">
     <h3>Escanear QR Code</h3>
     <p class="card-sub">Aponte a câmera para o ticket do participante</p>
-    <div class="qr-reader" id="qrReader"><div class="empty" style="padding:40px 20px;"><?= Icons::get('scan') ?><p>Iniciando câmera…</p></div></div>
+    <div class="qr-reader" id="qrReader"><div class="empty" style="padding:40px 20px;"><?= Icons::get('scan') ?><p>Clique em <b>Iniciar leitura</b> para ativar a câmera.</p></div></div>
     <div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;">
       <button class="btn-ad btn-gold-ad" id="btn-start"><?= Icons::get('scan') ?> Iniciar leitura</button>
       <button class="btn-ad btn-ghost-ad" id="btn-stop">Parar</button>
