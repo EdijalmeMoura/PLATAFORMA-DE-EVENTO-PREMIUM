@@ -59,7 +59,7 @@ if (!empty($ev['date_start'])) {
     <div class="hero-kicker fade-up" style="animation-delay:.1s"><?= e($hero['kicker'] ?? '') ?></div>
     <h1 class="hero-title fade-up" style="animation-delay:.2s"><?= e($hero['title'] ?? $ev['name']) ?></h1>
     <?php if ($hero['subtitle'] ?? ''): ?><div class="hero-sub fade-up" style="animation-delay:.3s"><?= e($hero['subtitle']) ?></div><?php endif; ?>
-    <p class="hero-desc fade-up" style="animation-delay:.4s"><?= e($hero['description'] ?? $ev['tagline']) ?></p>
+    <p class="hero-desc fade-up" style="animation-delay:.4s"><?= str_ireplace('excelência operacional', '<span class="gold-text">excelência operacional</span>', e($hero['description'] ?? $ev['tagline'])) ?></p>
     <div class="hero-meta fade-up" style="animation-delay:.5s">
       <span><?= Icons::get('calendar') ?><?= e($hero['date_text'] ?? $dateLong) ?></span>
       <span><?= Icons::get('pin') ?><?= e(str_replace("\n", ' · ', $hero['venue_text'] ?? (($ev['venue_name'] ?? '') . ' · ' . ($ev['city'] ?? '') . '—' . ($ev['state'] ?? '')))) ?></span>
@@ -68,9 +68,17 @@ if (!empty($ev['date_start'])) {
       <a href="<?= e(url('inscricao')) ?>" class="btn btn-gold"><?= e($hero['cta_primary'] ?? 'Garantir minha inscrição') ?></a>
       <a href="#evento" class="btn btn-ghost"><?= e($hero['cta_secondary'] ?? 'Conhecer o evento') ?></a>
     </div>
+    <div class="hero-trust fade-up" style="animation-delay:.7s">CONEXÕES DE ALTO NÍVEL <b>✦</b> CONTEÚDO QUE TRANSFORMA <b>✦</b> RESULTADOS QUE FICAM</div>
   </div>
   <div class="scroll-hint"><span>ROLE</span><span class="line"></span></div>
 </section>
+
+<!-- ================= MARQUEE ================= -->
+<div class="marquee" aria-hidden="true">
+  <div class="marquee-track">
+    <span><b>✦</b> CONEXÕES DE ALTO NÍVEL <b>✦</b> CONTEÚDO QUE TRANSFORMA <b>✦</b> RESULTADOS QUE FICAM <b>✦</b> CASES REAIS <b>✦</b> WCM AWARDS <b>✦</b> 08 DE OUTUBRO DE 2026</span><span><b>✦</b> CONEXÕES DE ALTO NÍVEL <b>✦</b> CONTEÚDO QUE TRANSFORMA <b>✦</b> RESULTADOS QUE FICAM <b>✦</b> CASES REAIS <b>✦</b> WCM AWARDS <b>✦</b> 08 DE OUTUBRO DE 2026</span>
+  </div>
+</div>
 
 <!-- ================= COUNTDOWN ================= -->
 <section class="countdown" id="countdown" data-target="<?= e($countdownTarget) ?>">
@@ -96,6 +104,13 @@ if (!empty($ev['date_start'])) {
       <div class="about-img reveal"><img src="<?= e($aboutImg) ?>" alt="Sobre o evento" loading="lazy"></div>
       <div class="about-text reveal reveal-d1"><?= nl2br(e($c('about', 'text', $ev['description'] ?? ''))) ?></div>
     </div>
+    <?php if ($c('about', 'stat1_num', '')): ?>
+    <div class="stats-row reveal">
+      <?php for ($si = 1; $si <= 3; $si++): if (!$c('about', 'stat' . $si . '_num', '')) continue; ?>
+      <div class="stat-card"><b><?= e($c('about', 'stat' . $si . '_num')) ?></b><span><?= e($c('about', 'stat' . $si . '_label')) ?></span></div>
+      <?php endfor; ?>
+    </div>
+    <?php endif; ?>
     <?php if ($diffs): ?>
     <div class="diff-grid">
       <?php foreach ($diffs as $i => $d): ?>
@@ -120,7 +135,7 @@ if (!empty($ev['date_start'])) {
       <h2 class="sec-title"><?= e($c('experience', 'title', 'O que esperar')) ?></h2>
       <p class="sec-sub"><?= e($c('experience', 'subtitle', '')) ?></p>
     </div>
-    <div class="exp-grid">
+    <div class="exp-grid <?= count($exps) === 5 ? 'cols-5' : '' ?>">
       <?php foreach ($exps as $i => $x): ?>
       <div class="exp-card reveal <?= $i % 3 > 0 ? 'reveal-d' . ($i % 3) : '' ?>">
         <span class="exp-num">0<?= $i + 1 ?></span>
@@ -129,6 +144,29 @@ if (!empty($ev['date_start'])) {
         <p><?= e($x['text'] ?? '') ?></p>
       </div>
       <?php endforeach; ?>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ================= WCM AWARDS ================= -->
+<section class="section awards" id="awards">
+  <div class="container">
+    <div class="reveal">
+      <span class="kicker center"><?= e($c('awards', 'kicker', 'RECONHECIMENTO')) ?></span>
+      <div class="awards-trophy"><?= Icons::get('star') ?></div>
+      <h2 class="awards-title"><?= e($c('awards', 'title', 'WCM AWARDS')) ?></h2>
+      <div class="awards-sub"><?= e($c('awards', 'subtitle', '')) ?></div>
+      <p class="awards-text"><?= e($c('awards', 'text', '')) ?></p>
+      <?php if ($c('awards', 'stat1_num', '')): ?>
+      <div class="awards-stats">
+        <?php for ($ai = 1; $ai <= 3; $ai++): if (!$c('awards', 'stat' . $ai . '_num', '')) continue; ?>
+        <span><b><?= e($c('awards', 'stat' . $ai . '_num')) ?></b><?= e($c('awards', 'stat' . $ai . '_label')) ?></span>
+        <?php endfor; ?>
+      </div>
+      <?php endif; ?>
+      <a href="<?= e(url('inscricao')) ?>" class="btn btn-gold"><?= e($c('awards', 'button', 'Garantir minha presença')) ?></a>
     </div>
   </div>
 </section>
@@ -240,7 +278,7 @@ if (!empty($ev['date_start'])) {
       <h2 class="sec-title"><?= e($c('tickets', 'title', 'Escolha sua experiência')) ?></h2>
       <p class="sec-sub"><?= e($c('tickets', 'subtitle', '')) ?></p>
     </div>
-    <div class="tix-grid">
+    <div class="tix-grid <?= count($tickets) === 2 ? 'cols-2' : '' ?>">
       <?php
       $count = count($tickets);
       foreach ($tickets as $i => $t):
@@ -301,6 +339,11 @@ if (!empty($ev['date_start'])) {
   <div class="container reveal">
     <h2><?= e($c('cta_final', 'title', 'Garanta sua presença')) ?></h2>
     <p><?= e($c('cta_final', 'subtitle', '')) ?></p>
+    <div class="cta-badges">
+      <span>◈ <?= e($dateLong) ?></span>
+      <span>◷ <?= e($ev['time_text'] ?? '') ?></span>
+      <span>◎ <?= e(($ev['venue_name'] ?? '') . ' · ' . ($ev['city'] ?? '') . '/' . ($ev['state'] ?? '')) ?></span>
+    </div>
     <a href="<?= e(url('inscricao')) ?>" class="btn btn-gold"><?= e($c('cta_final', 'button', 'Quero participar')) ?></a>
   </div>
 </section>

@@ -10,6 +10,7 @@ $exps = json_decode($c('experience', 'cards', '[]'), true) ?: [];
     <button class="tab-btn active" data-tab="cc-hero">Hero & Topo</button>
     <button class="tab-btn" data-tab="cc-about">Sobre</button>
     <button class="tab-btn" data-tab="cc-exp">Experiência</button>
+    <button class="tab-btn" data-tab="cc-awards">WCM Awards</button>
     <button class="tab-btn" data-tab="cc-sec">Títulos das seções</button>
     <button class="tab-btn" data-tab="cc-faq">FAQ</button>
     <button class="tab-btn" data-tab="cc-legal">Termos & Privacidade</button>
@@ -60,6 +61,17 @@ $exps = json_decode($c('experience', 'cards', '[]'), true) ?: [];
       </div>
       <?php endforeach; ?>
     </div>
+    <h3 style="margin:16px 0 10px;">Números de impacto (3)</h3>
+    <div class="grid g3">
+      <?php for ($si = 1; $si <= 3; $si++): ?>
+      <div class="field"><label>Número <?= $si ?></label><input data-sec="about" data-k="stat<?= $si ?>_num" value="<?= e($c('about', 'stat' . $si . '_num')) ?>" placeholder="Ex.: 30+"></div>
+      <?php endfor; ?>
+    </div>
+    <div class="grid g3">
+      <?php for ($si = 1; $si <= 3; $si++): ?>
+      <div class="field"><label>Legenda <?= $si ?></label><input data-sec="about" data-k="stat<?= $si ?>_label" value="<?= e($c('about', 'stat' . $si . '_label')) ?>" placeholder="Ex.: CATEGORIAS PREMIADAS"></div>
+      <?php endfor; ?>
+    </div>
     <button class="btn-ad btn-gold-ad sec-save" data-sec="about">Salvar seção Sobre</button>
   </div>
 
@@ -81,6 +93,29 @@ $exps = json_decode($c('experience', 'cards', '[]'), true) ?: [];
       <?php endforeach; ?>
     </div>
     <button class="btn-ad btn-gold-ad sec-save" data-sec="experience">Salvar Experiência</button>
+  </div>
+
+  <!-- WCM AWARDS -->
+  <div class="tab-pane" id="cc-awards">
+    <div class="grid g2">
+      <div class="field"><label>Kicker</label><input data-sec="awards" data-k="kicker" value="<?= e($c('awards', 'kicker')) ?>"></div>
+      <div class="field"><label>Título gigante</label><input data-sec="awards" data-k="title" value="<?= e($c('awards', 'title')) ?>"></div>
+      <div class="field"><label>Subtítulo</label><input data-sec="awards" data-k="subtitle" value="<?= e($c('awards', 'subtitle')) ?>"></div>
+      <div class="field"><label>Botão</label><input data-sec="awards" data-k="button" value="<?= e($c('awards', 'button')) ?>"></div>
+    </div>
+    <div class="field"><label>Texto</label><textarea data-sec="awards" data-k="text" style="min-height:90px;"><?= e($c('awards', 'text')) ?></textarea></div>
+    <h3 style="margin:14px 0 10px;">Destaques (3)</h3>
+    <div class="grid g3">
+      <?php for ($ai = 1; $ai <= 3; $ai++): ?>
+      <div class="field"><label>Número <?= $ai ?></label><input data-sec="awards" data-k="stat<?= $ai ?>_num" value="<?= e($c('awards', 'stat' . $ai . '_num')) ?>"></div>
+      <?php endfor; ?>
+    </div>
+    <div class="grid g3">
+      <?php for ($ai = 1; $ai <= 3; $ai++): ?>
+      <div class="field"><label>Legenda <?= $ai ?></label><input data-sec="awards" data-k="stat<?= $ai ?>_label" value="<?= e($c('awards', 'stat' . $ai . '_label')) ?>"></div>
+      <?php endfor; ?>
+    </div>
+    <button class="btn-ad btn-gold-ad sec-save" data-sec="awards">Salvar WCM Awards</button>
   </div>
 
   <!-- TÍTULOS -->

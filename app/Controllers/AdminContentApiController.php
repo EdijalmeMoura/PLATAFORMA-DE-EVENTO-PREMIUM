@@ -69,7 +69,7 @@ class AdminContentApiController {
         $section = preg_replace('/[^a-z_]/', '', $input['section'] ?? '');
         $values = $input['values'] ?? [];
         if ($section === '' || !is_array($values)) json_response(['ok' => false, 'error' => 'Dados inválidos.'], 422);
-        $allowedSections = ['hero', 'countdown', 'about', 'experience', 'schedule', 'speakers', 'venue', 'tickets', 'faq', 'register', 'cta_final', 'footer', 'legal', 'theme'];
+        $allowedSections = ['hero', 'countdown', 'about', 'experience', 'awards', 'schedule', 'speakers', 'venue', 'tickets', 'faq', 'register', 'cta_final', 'footer', 'legal', 'theme'];
         if (!in_array($section, $allowedSections, true)) json_response(['ok' => false, 'error' => 'Seção inválida.'], 422);
         foreach ($values as $k => $v) {
             $k = preg_replace('/[^a-z_]/', '', (string) $k);

@@ -94,6 +94,9 @@ class Seed {
                 'kicker' => 'O MOVIMENTO',
                 'title' => 'DO CAOS À EXCELÊNCIA OPERACIONAL',
                 'text' => "A CRONNUS Experience é o encontro das empresas que decidiram substituir o caos pela excelência operacional.\n\nUm dia para conectar líderes, compartilhar cases reais, discutir o futuro da indústria e reconhecer quem faz a excelência acontecer — com conteúdo real, conexões de alto nível e resultados que ficam.",
+                'stat1_num' => '02', 'stat1_label' => 'EDIÇÃO · 2025 → 2026',
+                'stat2_num' => '30+', 'stat2_label' => 'CATEGORIAS PREMIADAS',
+                'stat3_num' => '09H', 'stat3_label' => 'DE CONTEÚDO E CONEXÃO',
                 'differentials' => json_encode([
                     ['icon' => 'mic', 'title' => 'Palestras inspiradoras', 'text' => 'Conteúdo prático e visão que transforma.'],
                     ['icon' => 'users', 'title' => 'Conexões estratégicas', 'text' => 'Relacionamento que abre oportunidades.'],
@@ -112,6 +115,16 @@ class Seed {
                     ['icon' => 'star', 'title' => 'WCM Awards', 'text' => 'Reconhecimento que inspira. Mais de 30 categorias premiadas.'],
                     ['icon' => 'target', 'title' => 'Tendências e Futuro', 'text' => 'Prepare sua operação para os próximos 10 anos.'],
                 ], JSON_UNESCAPED_UNICODE),
+            ],
+            'awards' => [
+                'kicker' => 'RECONHECIMENTO',
+                'title' => 'WCM AWARDS',
+                'subtitle' => 'RECONHECIMENTO QUE INSPIRA E TRANSFORMA',
+                'text' => 'O palco onde a excelência operacional é celebrada: empresas e líderes que fazem a diferença, reconhecidos diante de toda a indústria.',
+                'stat1_num' => '30+', 'stat1_label' => 'CATEGORIAS PREMIADAS',
+                'stat2_num' => '07', 'stat2_label' => 'PALESTRAS & TALKS',
+                'stat3_num' => '01', 'stat3_label' => 'DIA INESQUECÍVEL',
+                'button' => 'GARANTA SUA PRESENÇA',
             ],
             'schedule' => ['kicker' => 'PROGRAMAÇÃO', 'title' => 'O DIA, MOMENTO A MOMENTO', 'subtitle' => 'Das 08h às 17h · Horários sujeitos a pequenos ajustes na véspera.'],
             'speakers' => ['kicker' => 'PALCO', 'title' => 'CONVIDADOS ESPECIAIS', 'subtitle' => 'Lideranças que transformam a indústria.'],
@@ -152,7 +165,7 @@ class Seed {
             'theme' => [
                 'gold' => '#D4A017', 'gold_light' => '#F2C14E',
                 'bg' => '#080808', 'bg2' => '#111111',
-                'font_head' => 'Cormorant Garamond', 'font_body' => 'Inter',
+                'font_head' => 'Montserrat', 'font_body' => 'Inter',
             ],
         ];
         foreach ($content as $section => $pairs) {
