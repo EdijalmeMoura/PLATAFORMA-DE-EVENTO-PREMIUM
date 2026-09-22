@@ -24,7 +24,7 @@ $exps = json_decode($c('experience', 'cards', '[]'), true) ?: [];
       <div class="field"><label>Linha superior (kicker)</label><input data-sec="hero" data-k="kicker" value="<?= e($c('hero', 'kicker')) ?>"></div>
       <div class="field"><label>Título principal</label><input data-sec="hero" data-k="title" value="<?= e($c('hero', 'title')) ?>"></div>
       <div class="field"><label>Subtítulo</label><input data-sec="hero" data-k="subtitle" value="<?= e($c('hero', 'subtitle')) ?>"></div>
-      <div class="field"><label>Descrição</label><input data-sec="hero" data-k="description" value="<?= e($c('hero', 'description')) ?>"></div>
+      <div class="field"><label>Descrição</label><input data-sec="hero" data-k="description" value="<?= e($c('hero', 'description')) ?>" placeholder="Use **trecho** para destacar em dourado"><div class="help">Dica: cercar com **asteriscos duplos** pinta o trecho de dourado. Ex.: substituir o caos pela **excelência operacional**.</div></div>
       <div class="field"><label>Texto da data</label><input data-sec="hero" data-k="date_text" value="<?= e($c('hero', 'date_text')) ?>"></div>
       <div class="field"><label>Texto do local</label><input data-sec="hero" data-k="venue_text" value="<?= e($c('hero', 'venue_text')) ?>"></div>
       <div class="field"><label>Botão primário</label><input data-sec="hero" data-k="cta_primary" value="<?= e($c('hero', 'cta_primary')) ?>"></div>
@@ -122,7 +122,7 @@ $exps = json_decode($c('experience', 'cards', '[]'), true) ?: [];
   <div class="tab-pane" id="cc-sec">
     <?php
     $secs = [
-      'schedule' => 'Programação', 'speakers' => 'Palestrantes', 'gallery' => 'Galeria', 'venue' => 'Local',
+      'schedule' => 'Programação', 'speakers' => 'Palestrantes', 'gallery' => 'Galeria', 'testimonials' => 'Depoimentos', 'venue' => 'Local',
       'tickets' => 'Ingressos', 'faq' => 'FAQ', 'register' => 'Inscrição', 'cta_final' => 'CTA Final', 'footer' => 'Rodapé',
     ];
     foreach ($secs as $sk => $label):
@@ -130,6 +130,7 @@ $exps = json_decode($c('experience', 'cards', '[]'), true) ?: [];
         'schedule' => ['kicker' => 'Kicker', 'title' => 'Título', 'subtitle' => 'Subtítulo'],
         'speakers' => ['kicker' => 'Kicker', 'title' => 'Título', 'subtitle' => 'Subtítulo'],
         'gallery' => ['kicker' => 'Kicker', 'title' => 'Título', 'subtitle' => 'Subtítulo'],
+        'testimonials' => ['kicker' => 'Kicker', 'title' => 'Título', 'subtitle' => 'Subtítulo'],
         'venue' => ['kicker' => 'Kicker', 'title' => 'Título', 'button' => 'Botão'],
         'tickets' => ['kicker' => 'Kicker', 'title' => 'Título', 'subtitle' => 'Subtítulo', 'button' => 'Botão'],
         'faq' => ['kicker' => 'Kicker', 'title' => 'Título', 'subtitle' => 'Subtítulo'],

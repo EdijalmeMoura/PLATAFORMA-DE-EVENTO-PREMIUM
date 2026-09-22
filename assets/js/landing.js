@@ -124,6 +124,35 @@
     });
   })();
 
+  // CTA fixo mobile: aparece após rolar além do hero
+  var sticky = document.getElementById('stickyCta');
+  if (sticky) {
+    function onScrollSticky() {
+      sticky.classList.toggle('show', window.scrollY > window.innerHeight * 0.75);
+    }
+    window.addEventListener('scroll', onScrollSticky, { passive: true });
+    onScrollSticky();
+  }
+
+  // Copiar link da página
+  var btnCopy = document.getElementById('btnCopyLink');
+  if (btnCopy) {
+    btnCopy.addEventListener('click', function () {
+      function done() { toast('Link copiado!'); }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(window.location.href).then(done, function () { fallbackCopy(); });
+      } else fallbackCopy();
+      function fallbackCopy() {
+        var ta = document.createElement('textarea');
+        ta.value = window.location.href;
+        document.body.appendChild(ta);
+        ta.select();
+        try { document.execCommand('copy'); done(); } catch (e) { toast('Não foi possível copiar.'); }
+        ta.remove();
+      }
+    });
+  }
+
   // Toast helper global
   window.toast = function (msg) {
     var t = document.getElementById('toast');

@@ -94,4 +94,11 @@ class Event {
             [self::id()]
         );
     }
+
+    public static function testimonials() {
+        return Database::fetchAll(
+            'SELECT * FROM ' . Database::table('testimonials') . ' WHERE event_id = ? ORDER BY sort_order, id',
+            [self::id()]
+        );
+    }
 }

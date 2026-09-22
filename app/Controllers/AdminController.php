@@ -280,6 +280,14 @@ class AdminController {
         ], 'content.manage');
     }
 
+    public static function testimonials() {
+        self::page('depoimentos', [
+            'page' => 'depoimentos',
+            'page_title' => 'Depoimentos',
+            'items' => Event::testimonials(),
+        ], 'content.manage');
+    }
+
     public static function tickets() {
         self::page('ingressos', [
             'page' => 'ingressos',

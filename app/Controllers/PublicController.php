@@ -25,6 +25,7 @@ class PublicController {
             'speakers' => Event::speakers(),
             'faqs' => Event::faqs(),
             'gallery' => Event::gallery(),
+            'testimonials' => Event::testimonials(),
         ];
     }
 

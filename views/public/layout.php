@@ -24,6 +24,22 @@ $initial = mb_strtoupper(mb_substr(trim($ev['name'] ?? 'E'), 0, 1));
 <meta property="og:title" content="<?= e($title) ?>">
 <meta property="og:description" content="<?= e($ev['tagline'] ?? '') ?>">
 <meta property="og:type" content="website">
+<?php
+$__req = trim(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '', '/');
+$__base = trim(BASE_PATH, '/');
+if ($__base !== '' && strpos($__req, $__base) === 0) $__req = trim(substr($__req, strlen($__base)), '/');
+$__canonical = url($__req);
+$__ogImg = !empty($ev['hero_image']) ? url($ev['hero_image']) : (!empty($ev['venue_image']) ? url($ev['venue_image']) : '');
+?>
+<link rel="canonical" href="<?= e($__canonical) ?>">
+<meta property="og:url" content="<?= e($__canonical) ?>">
+<?php if ($__ogImg): ?>
+<meta property="og:image" content="<?= e($__ogImg) ?>">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="<?= e($__ogImg) ?>">
+<?php endif; ?>
+<meta name="twitter:title" content="<?= e($title) ?>">
+<meta name="twitter:description" content="<?= e($ev['tagline'] ?? '') ?>">
 <meta name="theme-color" content="#080808">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23080808'/%3E%3Ctext x='32' y='44' font-family='Georgia' font-size='36' fill='%23C9A227' text-anchor='middle'%3E<?= e($initial) ?>%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -41,6 +57,7 @@ $initial = mb_strtoupper(mb_substr(trim($ev['name'] ?? 'E'), 0, 1));
 <?php if (!empty($extra_css)): ?><?= $extra_css ?><?php endif; ?>
 </head>
 <body>
+<a class="skip-link" href="#evento">Pular para o conteúdo</a>
 <?= $__content ?? '' ?>
 <script src="<?= e(url('assets/js/landing.js')) ?>?v=1.0.0" defer></script>
 <?php if (!empty($extra_js)): ?><?= $extra_js ?><?php endif; ?>

@@ -79,7 +79,7 @@ class Seed {
                 'kicker' => '08 DE OUTUBRO DE 2026 · CAMPINAS — SP',
                 'title' => 'CRONNUS',
                 'subtitle' => 'Experience 2026',
-                'description' => 'O movimento das empresas que decidiram substituir o caos pela excelência operacional.',
+                'description' => 'O movimento das empresas que decidiram substituir o caos pela **excelência operacional**.',
                 'cta_primary' => 'GARANTA SUA PRESENÇA',
                 'cta_secondary' => 'CONHECER O EVENTO',
                 'date_text' => '08 DE OUTUBRO DE 2026',
@@ -140,6 +140,7 @@ class Seed {
             ],
             'faq' => ['kicker' => 'DÚVIDAS', 'title' => 'PERGUNTAS FREQUENTES', 'subtitle' => 'Tudo o que você precisa saber antes do grande dia.'],
             'gallery' => ['kicker' => 'GALERIA', 'title' => 'MOMENTOS CRONNUS', 'subtitle' => 'Um gostinho da experiência que espera por você.'],
+            'testimonials' => ['kicker' => 'QUEM VIVEU', 'title' => 'QUEM JÁ VIVEU RECOMENDA', 'subtitle' => 'Histórias reais de quem transformou a operação.'],
             'register' => [
                 'kicker' => 'INSCRIÇÃO · POR CONVITE', 'title' => 'GARANTA SUA PRESENÇA',
                 'subtitle' => 'Vagas limitadas. Preencha seus dados com atenção — seu ticket digital chega em seguida.',

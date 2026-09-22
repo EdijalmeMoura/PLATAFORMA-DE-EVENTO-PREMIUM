@@ -488,6 +488,19 @@ class Database {
                 ],
                 'indexes' => [['event_id']],
             ],
+            'testimonials' => [
+                'cols' => [
+                    ['id', 'pk'],
+                    ['event_id', 'int'],
+                    ['name', 'string:120'],
+                    ['role', 'string:120', ['null' => true]],
+                    ['company', 'string:120', ['null' => true]],
+                    ['photo', 'string:255', ['null' => true]],
+                    ['text', 'text'],
+                    ['sort_order', 'int', ['default' => 0]],
+                ],
+                'indexes' => [['event_id']],
+            ],
             'rate_limits' => [
                 'cols' => [
                     ['id', 'pk'],

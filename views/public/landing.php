@@ -61,7 +61,7 @@ if (!empty($ev['date_start'])) {
     <div class="hero-kicker fade-up" style="animation-delay:.1s"><?= e($hero['kicker'] ?? '') ?></div>
     <h1 class="hero-title fade-up" style="animation-delay:.2s"><?= e($hero['title'] ?? $ev['name']) ?></h1>
     <?php if ($hero['subtitle'] ?? ''): ?><div class="hero-sub fade-up" style="animation-delay:.3s"><?= e($hero['subtitle']) ?></div><?php endif; ?>
-    <p class="hero-desc fade-up" style="animation-delay:.4s"><?= str_ireplace('excelência operacional', '<span class="gold-text">excelência operacional</span>', e($hero['description'] ?? $ev['tagline'])) ?></p>
+    <p class="hero-desc fade-up" style="animation-delay:.4s"><?= preg_replace('/\*\*(.+?)\*\*/', '<span class="gold-text">$1</span>', e($hero['description'] ?? $ev['tagline'])) ?></p>
     <div class="hero-meta fade-up" style="animation-delay:.5s">
       <span><?= Icons::get('calendar') ?><?= e($hero['date_text'] ?? $dateLong) ?></span>
       <span><?= Icons::get('pin') ?><?= e(str_replace("\n", ' · ', $hero['venue_text'] ?? (($ev['venue_name'] ?? '') . ' · ' . ($ev['city'] ?? '') . '—' . ($ev['state'] ?? '')))) ?></span>
@@ -294,6 +294,33 @@ if (!empty($ev['date_start'])) {
 
 <div class="divider"></div>
 
+<!-- ================= DEPOIMENTOS ================= -->
+<?php if (!empty($testimonials)): ?>
+<section class="section" id="depoimentos">
+  <div class="container">
+    <div class="center reveal">
+      <span class="kicker center"><?= e($c('testimonials', 'kicker', 'QUEM VIVEU')) ?></span>
+      <h2 class="sec-title"><?= e($c('testimonials', 'title', 'Quem já viveu recomenda')) ?></h2>
+      <p class="sec-sub"><?= e($c('testimonials', 'subtitle', '')) ?></p>
+    </div>
+    <div class="tst-grid">
+      <?php foreach ($testimonials as $i => $t): ?>
+      <figure class="tst-card reveal <?= $i % 3 > 0 ? 'reveal-d' . ($i % 3) : '' ?>">
+        <div class="tst-stars" aria-label="5 de 5 estrelas">★★★★★</div>
+        <blockquote>“<?= nl2br(e($t['text'])) ?>”</blockquote>
+        <figcaption>
+          <?php if ($t['photo']): ?><img src="<?= e(url($t['photo'])) ?>" alt="<?= e($t['name']) ?>" loading="lazy">
+          <?php else: ?><span class="tst-initial"><?= e(mb_strtoupper(mb_substr($t['name'], 0, 1))) ?></span><?php endif; ?>
+          <span><strong><?= e($t['name']) ?></strong><small><?= e(trim(($t['role'] ?: '') . (($t['role'] && $t['company']) ? ' · ' : '') . ($t['company'] ?: ''))) ?></small></span>
+        </figcaption>
+      </figure>
+      <?php endforeach; ?>
+    </div>
+  </div>
+</section>
+<div class="divider"></div>
+<?php endif; ?>
+
 <!-- ================= INGRESSOS ================= -->
 <section class="section" id="ingressos">
   <div class="container">
@@ -374,8 +401,39 @@ if (!empty($ev['date_start'])) {
       <span>◎ <?= e(($ev['venue_name'] ?? '') . ' · ' . ($ev['city'] ?? '') . '/' . ($ev['state'] ?? '')) ?></span>
     </div>
     <a href="<?= e(url('inscricao')) ?>" class="btn btn-gold"><?= e($c('cta_final', 'button', 'Quero participar')) ?></a>
+    <?php $shareUrl = url(''); $shareText = ($ev['name'] ?? 'Evento') . ' — ' . $dateLong . ' · ' . ($ev['city'] ?? '') . '/' . ($ev['state'] ?? ''); ?>
+    <div class="share-row">
+      <span>Conhece alguém que precisa estar lá? Compartilhe:</span>
+      <a class="share-btn" target="_blank" rel="noopener" aria-label="Compartilhar no WhatsApp" href="https://wa.me/?text=<?= urlencode($shareText . ' ' . $shareUrl) ?>"><?= Icons::get('whatsapp') ?></a>
+      <a class="share-btn" target="_blank" rel="noopener" aria-label="Compartilhar no LinkedIn" href="https://www.linkedin.com/sharing/share-offsite/?url=<?= urlencode($shareUrl) ?>"><?= Icons::get('linkedin') ?></a>
+      <button class="share-btn" type="button" id="btnCopyLink" aria-label="Copiar link"><?= Icons::get('link') ?></button>
+    </div>
   </div>
 </section>
+
+<!-- CTA fixo mobile -->
+<a href="<?= e(url('inscricao')) ?>" class="sticky-cta" id="stickyCta" aria-label="Inscrever-se agora">GARANTIR MINHA VAGA →</a>
+
+<?php
+// Dados estruturados (Google rich results)
+$ldOffers = [];
+foreach ($tickets as $t) {
+  $ldOffers[] = ['@type' => 'Offer', 'name' => $t['name'], 'price' => number_format((float) $t['price'], 2, '.', ''), 'priceCurrency' => 'BRL', 'availability' => 'https://schema.org/InStock', 'url' => url('inscricao?ingresso=' . $t['id'])];
+}
+echo '<script type="application/ld+json">' . json_encode([
+  '@context' => 'https://schema.org',
+  '@type' => 'Event',
+  'name' => $ev['name'] ?? '',
+  'description' => $ev['tagline'] ?? '',
+  'startDate' => ($ev['date_start'] ?? '') . 'T' . (preg_match('/\d{2}:\d{2}/', $ev['countdown_target'] ?? '', $mTm) ? $mTm[0] : '19:00'),
+  'endDate' => ($ev['date_end'] ?? $ev['date_start'] ?? ''),
+  'eventStatus' => 'https://schema.org/EventScheduled',
+  'location' => ['@type' => 'Place', 'name' => $ev['venue_name'] ?? '', 'address' => trim(($ev['address'] ?? '') . ', ' . ($ev['city'] ?? '') . ' - ' . ($ev['state'] ?? ''), ', -')],
+  'image' => !empty($ev['hero_image']) ? url($ev['hero_image']) : null,
+  'offers' => $ldOffers,
+  'organizer' => ['@type' => 'Organization', 'name' => $ev['name'] ?? '', 'url' => url('')],
+], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . '</script>';
+?>
 
 <!-- ================= FOOTER ================= -->
 <footer>
