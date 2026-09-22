@@ -129,3 +129,12 @@ spl_autoload_register(function ($class) {
 });
 
 require APP_ROOT . '/app/Core/Functions.php';
+
+// ---------- Migração automática (bancos já instalados) ----------
+// migrate() é idempotente (IF NOT EXISTS); roda 1x por versão de schema.
+try {
+    if (\App\Core\Database::getSetting('schema_v', '1') !== '2') {
+        \App\Core\Database::migrate();
+        \App\Core\Database::setSetting('schema_v', '2');
+    }
+} catch (\Exception $e) { /* banco ainda não instalado */ }

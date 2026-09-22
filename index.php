@@ -65,6 +65,10 @@ if ($path === '' || $path === 'inicio') {
     // ---------- Admin: páginas ----------
 } elseif ($path === 'admin/login') {
     AdminController::login();
+} elseif ($path === 'admin/esqueci-senha') {
+    AdminController::forgot();
+} elseif ($path === 'admin/redefinir-senha') {
+    AdminController::reset();
 } elseif ($path === 'admin/logout') {
     AdminController::logout();
 } elseif ($path === 'admin' || $path === 'admin/dashboard') {

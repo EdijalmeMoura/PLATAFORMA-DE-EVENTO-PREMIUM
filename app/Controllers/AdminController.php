@@ -2,11 +2,14 @@
 namespace App\Controllers;
 
 use App\Core\Auth;
+use App\Core\Audit;
 use App\Core\Csrf;
 use App\Core\Database;
 use App\Core\Event;
+use App\Core\RateLimiter;
 use App\Core\View;
 use App\Services\CheckinService;
+use App\Services\EmailService;
 use App\Services\MessageService;
 use App\Services\StatsService;
 
@@ -40,6 +43,114 @@ class AdminController {
     public static function logout() {
         Auth::logout();
         redirect('admin/login');
+    }
+
+    /** Esqueci a senha — solicita link por e-mail (anti-enumeração) */
+    public static function forgot() {
+        if (Auth::check()) redirect('admin');
+        $sent = false;
+        $error = '';
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            Csrf::requireValid();
+            $email = mb_strtolower(trim($_POST['email'] ?? ''));
+            $ip = client_ip();
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $error = 'Informe um e-mail válido.';
+            } elseif (!RateLimiter::check('pwreset:' . $ip, 5, 3600) || !RateLimiter::check('pwreset:' . $email, 3, 3600)) {
+                $error = 'Muitas tentativas. Aguarde e tente novamente.';
+            } else {
+                RateLimiter::hit('pwreset:' . $ip, 3600);
+                RateLimiter::hit('pwreset:' . $email, 3600);
+                $u = Database::fetch(
+                    'SELECT id, name FROM ' . Database::table('users') . ' WHERE email = ? AND active = 1',
+                    [$email]
+                );
+                if ($u) {
+                    $token = bin2hex(random_bytes(32));
+                    Database::delete('password_resets', 'email = ?', [$email]);
+                    Database::insert('password_resets', [
+                        'email' => $email,
+                        'token_hash' => hash('sha256', $token),
+                        'expires_at' => date('Y-m-d H:i:s', time() + 3600),
+                        'created_at' => now(),
+                    ]);
+                    $link = url('admin/redefinir-senha?token=' . $token . '&email=' . urlencode($email));
+                    $event = Event::current();
+                    list($ok, $err) = EmailService::send(
+                        Event::id(),
+                        $email,
+                        'Redefinição de senha — ' . ($event['name'] ?? 'Painel'),
+                        "Olá, " . ($u['name'] ?? '') . "!\n\n"
+                        . "Recebemos um pedido de redefinição de senha do painel.\n"
+                        . "Acesse o link abaixo (válido por 1 hora):\n" . $link . "\n\n"
+                        . "Se não foi você, ignore este e-mail."
+                    );
+                    Audit::log((int) $u['id'], 'password_reset_requested', 'users', (int) $u['id'], ['sent' => $ok, 'error' => $ok ? null : $err]);
+                }
+                // Mensagem idêntica exista ou não (não revela e-mails cadastrados)
+                $sent = true;
+            }
+        }
+        View::render('admin/forgot', [
+            'error' => $error,
+            'sent' => $sent,
+            'event' => Event::current() ?: ['name' => 'Evento Premium'],
+        ]);
+    }
+
+    /** Redefinição via token (uso único, 1h) */
+    public static function reset() {
+        if (Auth::check()) redirect('admin');
+        $error = '';
+        $email = mb_strtolower(trim($_REQUEST['email'] ?? ''));
+        $token = trim($_REQUEST['token'] ?? '');
+        $row = null;
+        if ($email !== '' && $token !== '') {
+            $row = Database::fetch(
+                'SELECT * FROM ' . Database::table('password_resets') . ' WHERE email = ? ORDER BY id DESC LIMIT 1',
+                [$email]
+            );
+            if (!$row || !hash_equals($row['token_hash'], hash('sha256', $token)) || strtotime($row['expires_at']) < time()) {
+                $row = null;
+            }
+        }
+        if (!$row) {
+            View::render('admin/reset', [
+                'error' => 'Link inválido ou expirado. Solicite um novo.',
+                'valid' => false,
+                'event' => Event::current() ?: ['name' => 'Evento Premium'],
+            ]);
+            return;
+        }
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            Csrf::requireValid();
+            $p1 = (string) ($_POST['password'] ?? '');
+            $p2 = (string) ($_POST['password2'] ?? '');
+            if (strlen($p1) < 8) {
+                $error = 'A senha deve ter ao menos 8 caracteres.';
+            } elseif ($p1 !== $p2) {
+                $error = 'As senhas não conferem.';
+            } else {
+                $u = Database::fetch('SELECT id FROM ' . Database::table('users') . ' WHERE email = ? AND active = 1', [$email]);
+                if ($u) {
+                    Database::update('users', [
+                        'password_hash' => password_hash($p1, PASSWORD_DEFAULT),
+                        'must_change_password' => 0,
+                        'updated_at' => now(),
+                    ], 'id = :id', ['id' => $u['id']]);
+                    Audit::log((int) $u['id'], 'password_reset_done', 'users', (int) $u['id']);
+                }
+                Database::delete('password_resets', 'email = ?', [$email]);
+                redirect('admin/login?reset=ok');
+            }
+        }
+        View::render('admin/reset', [
+            'error' => $error,
+            'valid' => true,
+            'email' => $email,
+            'token' => $token,
+            'event' => Event::current() ?: ['name' => 'Evento Premium'],
+        ]);
     }
 
     public static function dashboard() {

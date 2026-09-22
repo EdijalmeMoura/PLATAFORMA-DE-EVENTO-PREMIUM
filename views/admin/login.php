@@ -29,6 +29,7 @@ a{color:#C9A227}
   <h1><?= e(strtok($event['name'] ?? 'Evento', '·—-')) ?></h1>
   <p class="sub">Painel do organizador</p>
   <?php if (!empty($error)): ?><div class="err"><?= e($error) ?></div><?php endif; ?>
+  <?php if (($_GET['reset'] ?? '') === 'ok'): ?><div class="err" style="background:#122a14;border-color:#245c2a;color:#b9f0c0;">Senha redefinida! Entre com a nova senha.</div><?php endif; ?>
   <form method="post">
     <?= App\Core\Csrf::field() ?>
     <label>E-mail</label>
@@ -37,6 +38,7 @@ a{color:#C9A227}
     <input type="password" name="password" required placeholder="••••••••">
     <button class="btn">ENTRAR NO PAINEL</button>
   </form>
+  <p style="text-align:center;margin-top:16px;font-size:13px;"><a href="<?= e(url('admin/esqueci-senha')) ?>">Esqueci minha senha</a></p>
   <a class="back" href="<?= e(url('')) ?>">← Voltar ao site</a>
 </div>
 </body>

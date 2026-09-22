@@ -92,6 +92,8 @@ Nenhum conhecimento de programação é necessário após a instalação.
 
 - **Administrador**: tudo. **Nunca deixe zero admins ativos** (o sistema bloqueia).
 - Senhas de equipe criadas pelo gestor **devem ser trocadas no 1º acesso**.
+- Esqueceu a senha? Na tela de login, **Esqueci minha senha** envia um link
+  válido por 1 hora (requer SMTP configurado).
 - Sessões expiram por inatividade (padrão 2 h, ajustável no `.env`).
 - Login com limite de tentativas; falhas ficam na auditoria.
 - Segredos (SMTP, WhatsApp) ficam **criptografados**; nunca aparecem na tela.

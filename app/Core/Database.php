@@ -468,6 +468,16 @@ class Database {
                 ],
                 'indexes' => [['user_id'], ['entity', 'entity_id'], ['created_at']],
             ],
+            'password_resets' => [
+                'cols' => [
+                    ['id', 'pk'],
+                    ['email', 'string:160'],
+                    ['token_hash', 'string:64'],
+                    ['expires_at', 'datetime'],
+                    ['created_at', 'datetime'],
+                ],
+                'indexes' => [['email'], ['token_hash']],
+            ],
             'rate_limits' => [
                 'cols' => [
                     ['id', 'pk'],
