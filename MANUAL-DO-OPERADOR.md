@@ -32,6 +32,7 @@ Nenhum conhecimento de programação é necessário após a instalação.
 | **Palestrantes** | Convidados com foto e bio |
 | **Galeria** | Fotos da landing (upload, legenda, ordem ↑↓) |
 | **Depoimentos** | Prova social antes dos ingressos (foto, cargo, texto) |
+| **Textos → Vídeo** | URL do YouTube/Vimeo/MP4 (vazio = seção oculta) |
 | **Ingressos** | Lotes, preços, quantidades, janela de vendas, pausar |
 | **Formulário** | Campos da inscrição (padrão + personalizados) |
 | **Configurações** | Dados do evento, local, mapa, contato, imagens, status |

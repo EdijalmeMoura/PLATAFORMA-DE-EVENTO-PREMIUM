@@ -141,6 +141,7 @@ class Seed {
             'faq' => ['kicker' => 'DÚVIDAS', 'title' => 'PERGUNTAS FREQUENTES', 'subtitle' => 'Tudo o que você precisa saber antes do grande dia.'],
             'gallery' => ['kicker' => 'GALERIA', 'title' => 'MOMENTOS CRONNUS', 'subtitle' => 'Um gostinho da experiência que espera por você.'],
             'testimonials' => ['kicker' => 'QUEM VIVEU', 'title' => 'QUEM JÁ VIVEU RECOMENDA', 'subtitle' => 'Histórias reais de quem transformou a operação.'],
+            'video' => ['kicker' => 'SINTA O CLIMA', 'title' => 'O EVENTO EM 60 SEGUNDOS', 'subtitle' => 'Aperte o play e veja por que ninguém fica de fora.', 'url' => ''],
             'register' => [
                 'kicker' => 'INSCRIÇÃO · POR CONVITE', 'title' => 'GARANTA SUA PRESENÇA',
                 'subtitle' => 'Vagas limitadas. Preencha seus dados com atenção — seu ticket digital chega em seguida.',

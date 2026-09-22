@@ -10,6 +10,17 @@ $aboutImg = !empty($ev['about_image']) ? url($ev['about_image']) : url('assets/i
 $venueImg = !empty($ev['venue_image']) ? url($ev['venue_image']) : null;
 $diffs = json_decode($c('about', 'differentials', '[]'), true) ?: [];
 $exps = json_decode($c('experience', 'cards', '[]'), true) ?: [];
+$videoSource = function ($raw) {
+  $u = trim((string) $raw);
+  if ($u === '' || !preg_match('#^https?://#i', $u)) return null;
+  if (preg_match('#\.(mp4|webm|ogg)(\?|#|$)#i', $u)) return ['type' => 'file', 'src' => $u];
+  if (preg_match('#youtube\.com/watch.*[?&]v=([\w-]{6,})#', $u, $m)) return ['type' => 'embed', 'src' => 'https://www.youtube-nocookie.com/embed/' . $m[1]];
+  if (preg_match('#youtu\.be/([\w-]{6,})#', $u, $m)) return ['type' => 'embed', 'src' => 'https://www.youtube-nocookie.com/embed/' . $m[1]];
+  if (preg_match('#youtube\.com/shorts/([\w-]{6,})#', $u, $m)) return ['type' => 'embed', 'src' => 'https://www.youtube-nocookie.com/embed/' . $m[1]];
+  if (preg_match('#vimeo\.com/(\d+)#', $u, $m)) return ['type' => 'embed', 'src' => 'https://player.vimeo.com/video/' . $m[1]];
+  if (strpos($u, 'youtube-nocookie.com/embed/') !== false || strpos($u, 'player.vimeo.com/video/') !== false) return ['type' => 'embed', 'src' => $u];
+  return null;
+};
 $countdownTarget = $ev['countdown_target'] ?: ($ev['date_start'] ? $ev['date_start'] . ' 19:00:00' : '');
 $dateLong = '';
 if (!empty($ev['date_start'])) {
@@ -109,7 +120,7 @@ if (!empty($ev['date_start'])) {
     <?php if ($c('about', 'stat1_num', '')): ?>
     <div class="stats-row reveal">
       <?php for ($si = 1; $si <= 3; $si++): if (!$c('about', 'stat' . $si . '_num', '')) continue; ?>
-      <div class="stat-card"><b><?= e($c('about', 'stat' . $si . '_num')) ?></b><span><?= e($c('about', 'stat' . $si . '_label')) ?></span></div>
+      <div class="stat-card"><b class="stat-num"><?= e($c('about', 'stat' . $si . '_num')) ?></b><span><?= e($c('about', 'stat' . $si . '_label')) ?></span></div>
       <?php endfor; ?>
     </div>
     <?php endif; ?>
@@ -129,6 +140,29 @@ if (!empty($ev['date_start'])) {
 
 <div class="divider"></div>
 
+<?php $video = $videoSource($c('video', 'url', '')); ?>
+<?php if ($video): ?>
+<!-- ================= VÍDEO ================= -->
+<section class="section video-sec" id="video">
+  <div class="container">
+    <div class="center reveal">
+      <span class="kicker center"><?= e($c('video', 'kicker', 'SINTA O CLIMA')) ?></span>
+      <h2 class="sec-title"><?= e($c('video', 'title', 'O EVENTO EM 60 SEGUNDOS')) ?></h2>
+      <?php if ($c('video', 'subtitle', '')): ?><p class="sec-sub"><?= e($c('video', 'subtitle')) ?></p><?php endif; ?>
+    </div>
+    <div class="video-frame reveal">
+      <?php if ($video['type'] === 'file'): ?>
+        <video controls preload="metadata" playsinline src="<?= e($video['src']) ?>"></video>
+      <?php else: ?>
+        <iframe src="<?= e($video['src']) ?>" title="Vídeo do evento" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+      <?php endif; ?>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<?php endif; ?>
 <!-- ================= EXPERIÊNCIA ================= -->
 <section class="section" id="experiencia">
   <div class="container">
@@ -413,6 +447,7 @@ if (!empty($ev['date_start'])) {
 
 <!-- CTA fixo mobile -->
 <a href="<?= e(url('inscricao')) ?>" class="sticky-cta" id="stickyCta" aria-label="Inscrever-se agora">GARANTIR MINHA VAGA →</a>
+<button class="to-top" id="toTop" type="button" aria-label="Voltar ao topo">↑</button>
 
 <?php
 // Dados estruturados (Google rich results)

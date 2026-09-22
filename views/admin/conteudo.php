@@ -122,7 +122,7 @@ $exps = json_decode($c('experience', 'cards', '[]'), true) ?: [];
   <div class="tab-pane" id="cc-sec">
     <?php
     $secs = [
-      'schedule' => 'Programação', 'speakers' => 'Palestrantes', 'gallery' => 'Galeria', 'testimonials' => 'Depoimentos', 'venue' => 'Local',
+      'schedule' => 'Programação', 'speakers' => 'Palestrantes', 'gallery' => 'Galeria', 'testimonials' => 'Depoimentos', 'video' => 'Vídeo', 'venue' => 'Local',
       'tickets' => 'Ingressos', 'faq' => 'FAQ', 'register' => 'Inscrição', 'cta_final' => 'CTA Final', 'footer' => 'Rodapé',
     ];
     foreach ($secs as $sk => $label):
@@ -131,6 +131,7 @@ $exps = json_decode($c('experience', 'cards', '[]'), true) ?: [];
         'speakers' => ['kicker' => 'Kicker', 'title' => 'Título', 'subtitle' => 'Subtítulo'],
         'gallery' => ['kicker' => 'Kicker', 'title' => 'Título', 'subtitle' => 'Subtítulo'],
         'testimonials' => ['kicker' => 'Kicker', 'title' => 'Título', 'subtitle' => 'Subtítulo'],
+        'video' => ['kicker' => 'Kicker', 'title' => 'Título', 'subtitle' => 'Subtítulo', 'url' => 'URL do vídeo (YouTube, Vimeo ou MP4 — vazio oculta a seção)'],
         'venue' => ['kicker' => 'Kicker', 'title' => 'Título', 'button' => 'Botão'],
         'tickets' => ['kicker' => 'Kicker', 'title' => 'Título', 'subtitle' => 'Subtítulo', 'button' => 'Botão'],
         'faq' => ['kicker' => 'Kicker', 'title' => 'Título', 'subtitle' => 'Subtítulo'],
