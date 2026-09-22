@@ -1,0 +1,22 @@
+# Dependências / build
+node_modules/
+vendor/
+
+# Ambiente e dados locais
+.env
+storage/*.sqlite
+storage/*.sqlite-*
+storage/.key
+storage/installed.lock
+storage/logs/*.log
+uploads/*
+!uploads/.htaccess
+!uploads/.gitkeep
+
+# Sistema
+.DS_Store
+Thumbs.db
+*.log
+
+# Preview local (gerado)
+preview.html
