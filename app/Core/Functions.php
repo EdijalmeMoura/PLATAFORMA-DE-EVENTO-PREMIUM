@@ -144,6 +144,7 @@ function brand_logo($logoPath, $fallbackInitial = 'E', $height = 44) {
         if (is_file($full) && filesize($full) < 200000) {
             $svg = (string) @file_get_contents($full);
             $svg = preg_replace('#<\s*script[^>]*>.*?<\s*/\s*script\s*>#is', '', $svg);
+            $svg = preg_replace('#\s+on[a-z]+\s*=\s*("[^"]*"|\'[^\']*\'|[^\s>]+)#i', '', $svg);
             $svg = preg_replace('/<svg\b/', '<svg height="' . $h . '"', $svg, 1);
             return '<span class="brand-logo">' . $svg . '</span>';
         }

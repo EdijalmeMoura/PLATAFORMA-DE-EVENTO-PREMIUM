@@ -26,6 +26,15 @@ foreach ($fields as $f) { $grouped[$f['section']][] = $f; }
 
 <section>
   <div class="container form-wrap">
+    <?php if (($ev['status'] ?? 'ACTIVE') !== 'ACTIVE'): ?>
+    <div class="form-card" style="text-align:center;padding:60px 30px;">
+      <div style="font-size:48px;margin-bottom:16px;">⏸</div>
+      <h2 style="font-family:Montserrat,sans-serif;"><?= ($ev['status'] ?? '') === 'PAUSED' ? 'Inscrições pausadas' : 'Inscrições encerradas' ?></h2>
+      <p class="sec-sub" style="margin:12px auto 24px;"><?= ($ev['status'] ?? '') === 'PAUSED' ? 'Estamos ajustando os últimos detalhes. Volte em breve!' : 'Obrigado pelo interesse! Acompanhe nossos canais para os próximos eventos.' ?></p>
+      <a href="<?= e(url('')) ?>" class="btn btn-gold">Voltar ao início</a>
+      <p style="margin-top:18px;"><a href="<?= e(url('meu-ticket')) ?>">Já me inscrevi — recuperar meu ticket →</a></p>
+    </div>
+    <?php else: ?>
     <form class="form-card" id="regForm" novalidate>
       <input type="hidden" name="csrf_token" value="<?= e(Csrf::token()) ?>">
       <div class="form-error" id="formError"></div>
@@ -110,6 +119,7 @@ foreach ($fields as $f) { $grouped[$f['section']][] = $f; }
       <button type="submit" class="btn btn-gold btn-block" id="submitBtn"><?= e($c('register', 'button', 'Confirmar inscrição')) ?></button>
       <p style="text-align:center;color:var(--dim);font-size:13px;margin-top:16px;">🔒 Ambiente seguro · Seus dados protegidos pela LGPD</p>
     </form>
+    <?php endif; ?>
   </div>
 </section>
 

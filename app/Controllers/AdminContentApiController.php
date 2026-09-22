@@ -58,6 +58,14 @@ class AdminContentApiController {
         if (empty($data['name'] ?? Event::current()['name'])) {
             json_response(['ok' => false, 'error' => 'Nome do evento é obrigatório.'], 422);
         }
+        foreach (['map_url', 'website', 'instagram', 'linkedin'] as $uk) {
+            if (!empty($data[$uk]) && !preg_match('#^https?://#i', $data[$uk])) {
+                json_response(['ok' => false, 'error' => 'URL inválida em ' . $uk . ' (use http:// ou https://).'], 422);
+            }
+        }
+        if (!empty($data['contact_email']) && !filter_var($data['contact_email'], FILTER_VALIDATE_EMAIL)) {
+            json_response(['ok' => false, 'error' => 'E-mail de contato inválido.'], 422);
+        }
         foreach (['date_start', 'date_end'] as $dk) {
             if (!empty($data[$dk]) && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $data[$dk])) {
                 json_response(['ok' => false, 'error' => 'Data inválida (use AAAA-MM-DD).'], 422);
@@ -65,6 +73,11 @@ class AdminContentApiController {
         }
         if (!empty($data['date_start']) && !empty($data['date_end']) && $data['date_end'] < $data['date_start']) {
             json_response(['ok' => false, 'error' => 'A data de término deve ser depois do início.'], 422);
+        }
+        // Mapa incorporado: só iframe do Google Maps (anti stored-XSS na landing)
+        if (!empty($data['maps_embed'])) {
+            $data['maps_embed'] = self::sanitizeEmbed($data['maps_embed']);
+            if ($data['maps_embed'] === false) json_response(['ok' => false, 'error' => 'Mapa inválido. Cole o iframe de incorporação do Google Maps ( Compartilhar → Incorporar ).'], 422);
         }
         // datetime-local (2026-10-08T08:00) → DATETIME do banco
         if (!empty($data['countdown_target'])) {
@@ -75,6 +88,16 @@ class AdminContentApiController {
         Database::update('events', $data, 'id = :id', ['id' => $E]);
         Audit::log(Auth::id(), 'event_update', 'events', $E);
         json_response(['ok' => true]);
+    }
+
+    /** Permite só <iframe> do Google Maps; reconstrói a tag com atributos seguros. */
+    private static function sanitizeEmbed($html) {
+        if (!preg_match('#<iframe\b[^>]*\bsrc=(["\'])(.*?)\\1#is', $html, $m)) return false;
+        $src = trim($m[2]);
+        if (stripos($src, 'https://') !== 0) return false;
+        $host = strtolower((string) parse_url($src, PHP_URL_HOST));
+        if ($host !== 'google.com' && substr($host, -11) !== '.google.com') return false;
+        return '<iframe src="' . e($src) . '" width="100%" height="360" style="border:0;border-radius:16px;" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>';
     }
 
     private static function contentSave() {
@@ -140,6 +163,13 @@ class AdminContentApiController {
             }
             if ($table === 'ticket_types' && !empty($data['sale_start']) && !empty($data['sale_end']) && $data['sale_end'] < $data['sale_start']) {
                 json_response(['ok' => false, 'error' => 'O fim das vendas deve ser depois do início.'], 422);
+            }
+            if ($table === 'speakers') {
+                foreach (['instagram', 'linkedin'] as $uk) {
+                    if (!empty($data[$uk]) && !preg_match('#^https?://#i', $data[$uk])) {
+                        json_response(['ok' => false, 'error' => 'URL inválida (use http:// ou https://).'], 422);
+                    }
+                }
             }
             // Troca de imagem: apaga o arquivo antigo (evita órfãos em uploads/)
             $imgCol = $table === 'schedule_items' ? 'image' : ($table === 'speakers' ? 'photo' : null);

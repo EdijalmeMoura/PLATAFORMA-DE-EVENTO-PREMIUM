@@ -2,6 +2,7 @@
 namespace App\Services;
 
 use App\Core\Database;
+use App\Core\Event;
 use App\Core\Validator;
 
 defined('APP') or exit;
@@ -35,6 +36,14 @@ class RegistrationService {
         $errors = [];
         $clean = [];
         $answers = [];
+        // Evento pausado/encerrado não aceita novas inscrições
+        $evStatus = Event::current()['status'] ?? 'ACTIVE';
+        if ($evStatus !== 'ACTIVE') {
+            $errors['_global'] = $evStatus === 'PAUSED'
+                ? 'Inscrições pausadas temporariamente. Tente novamente em breve.'
+                : 'Inscrições encerradas. Obrigado pelo interesse!';
+            return [$errors, $clean, $answers, null];
+        }
         $fields = self::activeFields($eventId);
 
         // Ingresso
