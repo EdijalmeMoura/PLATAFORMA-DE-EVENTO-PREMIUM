@@ -59,6 +59,16 @@ class ExportService {
         );
     }
 
+    /**
+     * Neutraliza CSV formula injection: células iniciadas com = + - @
+     * executariam fórmulas ao abrir no Excel. Prefixo ' força texto.
+     */
+    private static function cell($v) {
+        $v = (string) $v;
+        if ($v !== '' && strpos('=+-@', $v[0]) !== false) $v = "'" . $v;
+        return $v;
+    }
+
     public static function csv($rows) {
         $cols = self::columns();
         header('Content-Type: text/csv; charset=utf-8');
@@ -72,7 +82,7 @@ class ExportService {
                 $v = $r[$k] ?? '';
                 if ($k === 'status') $v = registration_status_label($v);
                 if ($k === 'payment_status') $v = payment_status_label($v);
-                $line[] = $v;
+                $line[] = self::cell($v);
             }
             fputcsv($out, $line, ';');
         }
@@ -97,7 +107,8 @@ class ExportService {
                 $v = $r[$k] ?? '';
                 if ($k === 'status') $v = registration_status_label($v);
                 if ($k === 'payment_status') $v = payment_status_label($v);
-                echo '<td>' . e($v) . '</td>';
+                // mso-number-format:\@ preserva zeros à esquerda (CPF, telefone, código)
+                echo '<td style="mso-number-format:\\@">' . e(self::cell($v)) . '</td>';
             }
             echo '</tr>';
         }

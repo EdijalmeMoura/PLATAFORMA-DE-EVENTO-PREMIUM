@@ -31,6 +31,9 @@ class Database {
                     \PDO::ATTR_EMULATE_PREPARES => false,
                 ]);
                 $pdo->exec("SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci");
+                // Alinha CURDATE()/NOW() com APP_TIMEZONE (offset; zonas nomeadas
+                // raramente existem em hospedagem compartilhada)
+                $pdo->exec("SET time_zone = '" . date('P') . "'");
             } else {
                 $path = DB_PATH;
                 if ($path[0] !== '/' && !preg_match('#^[A-Za-z]:\\\\#', $path)) {
