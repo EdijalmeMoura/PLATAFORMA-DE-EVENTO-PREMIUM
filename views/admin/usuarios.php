@@ -76,15 +76,16 @@ $allPerms = Auth::allPermissions();
 
 <script>
 (function () {
-  var roleMap = {};
+  var roleMap = {}, defaultRole = '';
   <?php foreach ($roles as $r): ?>roleMap['<?= $r['slug'] ?>'] = <?= (int) $r['id'] ?>;
   <?php endforeach; ?>
+  defaultRole = roleMap['visualizacao'] || Object.keys(roleMap).map(function (k) { return roleMap[k]; }).pop() || '';
   function openModalUser(u) {
     document.getElementById('mu-title').textContent = u ? 'Editar usuário' : 'Novo usuário';
     document.getElementById('mu-id').value = u ? u.id : '';
     document.getElementById('mu-name').value = u ? u.name : '';
     document.getElementById('mu-email').value = u ? u.email : '';
-    document.getElementById('mu-role').value = u ? (roleMap[u.role] || '') : '';
+    document.getElementById('mu-role').value = u ? (roleMap[u.role] || defaultRole) : defaultRole;
     document.getElementById('mu-active').checked = u ? +u.active === 1 : true;
     document.getElementById('mu-pass').value = '';
     openModal('modalUser');

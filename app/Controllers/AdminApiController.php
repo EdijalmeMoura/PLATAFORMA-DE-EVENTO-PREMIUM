@@ -282,15 +282,30 @@ class AdminApiController {
             if ($name === '' || !filter_var($email, FILTER_VALIDATE_EMAIL) || !$roleId) {
                 json_response(['ok' => false, 'error' => 'Preencha nome, e-mail válido e perfil.'], 422);
             }
+            $role = Database::fetch('SELECT * FROM ' . Database::table('roles') . ' WHERE id = ?', [$roleId]);
+            if (!$role) json_response(['ok' => false, 'error' => 'Perfil inválido.'], 422);
+            // Proteção do último admin: nunca ficar sem administrador ativo
+            $adminRoleId = (int) Database::fetchColumn('SELECT id FROM ' . Database::table('roles') . ' WHERE slug = ?', ['admin']);
+            $otherAdmins = function ($exceptId) use ($adminRoleId) {
+                return (int) Database::fetchColumn(
+                    'SELECT COUNT(*) FROM ' . Database::table('users') . ' WHERE role_id = ? AND active = 1 AND id != ?',
+                    [$adminRoleId, $exceptId]
+                );
+            };
             $dup = Database::fetch('SELECT id FROM ' . Database::table('users') . ' WHERE email = ? AND id != ?', [$email, $id]);
             if ($dup) json_response(['ok' => false, 'error' => 'Este e-mail já está em uso.'], 422);
             if ($id > 0) {
                 if ($id === Auth::id() && !$active) json_response(['ok' => false, 'error' => 'Você não pode desativar seu próprio acesso.'], 422);
+                $current = Database::fetch('SELECT role_id, active FROM ' . Database::table('users') . ' WHERE id = ?', [$id]);
+                if ($current && (int) $current['role_id'] === $adminRoleId && ($roleId !== $adminRoleId || !$active) && $otherAdmins($id) === 0) {
+                    json_response(['ok' => false, 'error' => 'Este é o último administrador ativo. Promova outro antes.'], 422);
+                }
                 $data = ['name' => $name, 'email' => $email, 'role_id' => $roleId, 'active' => $active, 'updated_at' => now()];
                 if ($pass !== '') {
                     if (strlen($pass) < 8) json_response(['ok' => false, 'error' => 'Senha com mínimo de 8 caracteres.'], 422);
                     $data['password_hash'] = password_hash($pass, PASSWORD_DEFAULT);
-                    $data['must_change_password'] = 0;
+                    // Senha definida pelo gestor: dono troca no próximo acesso (exceto a própria)
+                    $data['must_change_password'] = ($id === Auth::id()) ? 0 : 1;
                 }
                 Database::update('users', $data, 'id = :id', ['id' => $id]);
                 Audit::log(Auth::id(), 'user_update', 'users', $id);
@@ -299,7 +314,7 @@ class AdminApiController {
                 $id = Database::insert('users', [
                     'role_id' => $roleId, 'name' => $name, 'email' => $email,
                     'password_hash' => password_hash($pass, PASSWORD_DEFAULT),
-                    'active' => $active, 'must_change_password' => 0, 'created_at' => now(),
+                    'active' => $active, 'must_change_password' => 1, 'created_at' => now(),
                 ]);
                 Audit::log(Auth::id(), 'user_create', 'users', $id);
             }
@@ -308,6 +323,17 @@ class AdminApiController {
         if ($action === 'delete' && $method === 'POST') {
             $id = (int) ($input['id'] ?? 0);
             if ($id === Auth::id()) json_response(['ok' => false, 'error' => 'Você não pode excluir seu próprio acesso.'], 422);
+            $target = Database::fetch('SELECT role_id, active FROM ' . Database::table('users') . ' WHERE id = ?', [$id]);
+            if ($target) {
+                $adminRoleId = (int) Database::fetchColumn('SELECT id FROM ' . Database::table('roles') . ' WHERE slug = ?', ['admin']);
+                $others = (int) Database::fetchColumn(
+                    'SELECT COUNT(*) FROM ' . Database::table('users') . ' WHERE role_id = ? AND active = 1 AND id != ?',
+                    [$adminRoleId, $id]
+                );
+                if ((int) $target['role_id'] === $adminRoleId && (int) $target['active'] === 1 && $others === 0) {
+                    json_response(['ok' => false, 'error' => 'Este é o último administrador ativo e não pode ser excluído.'], 422);
+                }
+            }
             Database::delete('users_permissions', 'user_id = ?', [$id]);
             Database::delete('users', 'id = ?', [$id]);
             Audit::log(Auth::id(), 'user_delete', 'users', $id);

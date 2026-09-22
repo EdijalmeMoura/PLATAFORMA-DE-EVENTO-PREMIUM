@@ -10,8 +10,8 @@
         <?php foreach ($logs as $l): ?>
         <tr>
           <td><?= e(fdate($l['created_at'], true)) ?></td>
-          <td><?= e($l['user_name'] ?? 'sistema') ?></td>
-          <td><span class="badge b-gold mono"><?= e($l['action']) ?></span></td>
+          <td><?= e($l['user_name'] ?? ($l['user_id'] ? 'usuário removido' : 'sistema')) ?></td>
+          <td><span class="badge b-gold mono" <?= !empty($l['details']) ? 'title="' . e($l['details']) . '"' : '' ?>><?= e($l['action']) ?></span></td>
           <td class="mono"><?= e(trim(($l['entity'] ?? '') . ' #' . ($l['entity_id'] ?? ''), ' #')) ?></td>
           <td class="mono"><?= e($l['ip'] ?? '') ?></td>
         </tr>
