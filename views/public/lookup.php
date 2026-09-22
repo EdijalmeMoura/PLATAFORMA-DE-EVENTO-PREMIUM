@@ -18,6 +18,7 @@ $initial = mb_strtoupper(mb_substr(trim($ev['name'] ?? 'E'), 0, 1));
     <div class="lookup-card">
       <?php if (!empty($error)): ?><div class="form-error show"><?= e($error) ?></div><?php endif; ?>
       <form method="post">
+        <input type="hidden" name="csrf_token" value="<?= e(\App\Core\Csrf::token()) ?>">
         <div class="f-grid">
           <div class="field f-full">
             <label for="email">E-mail da inscrição</label>

@@ -281,10 +281,15 @@ if (!empty($ev['date_start'])) {
     <div class="tix-grid <?= count($tickets) === 2 ? 'cols-2' : '' ?>">
       <?php
       $count = count($tickets);
+      $nowTick = date('Y-m-d H:i:s');
       foreach ($tickets as $i => $t):
         $isFeatured = ($count >= 3 && $i === 1) || ($count < 3 && $i === $count - 1);
         $remaining = ((int) $t['quantity'] > 0) ? max(0, (int) $t['quantity'] - (int) $t['sold']) : null;
         $soldOut = $remaining !== null && $remaining <= 0;
+        $notStarted = !empty($t['sale_start']) && $nowTick < $t['sale_start'];
+        $ended = !empty($t['sale_end']) && $nowTick > $t['sale_end'];
+        $unavailable = $soldOut || $notStarted || $ended;
+        $unLabel = $soldOut ? 'ESGOTADO' : ($notStarted ? 'EM BREVE' : 'VENDAS ENCERRADAS');
         $benefits = array_filter(array_map('trim', explode("\n", str_replace(["\r", ";"], ["", "\n"], $t['benefits'] ?? ''))));
       ?>
       <div class="tix reveal <?= $isFeatured ? 'featured' : '' ?> <?= $soldOut ? 'tix-soldout' : '' ?>">
@@ -297,9 +302,9 @@ if (!empty($ev['date_start'])) {
           <?php foreach ($benefits as $b): ?><li><?= Icons::get('check') ?><span><?= e($b) ?></span></li><?php endforeach; ?>
         </ul>
         <?php endif; ?>
-        <?php if ($soldOut): ?>
-          <div class="tix-left">ESGOTADO</div>
-          <button class="btn btn-ghost btn-block" disabled>ESGOTADO</button>
+        <?php if ($unavailable): ?>
+          <div class="tix-left"><?= $unLabel ?></div>
+          <button class="btn btn-ghost btn-block" disabled><?= $unLabel ?></button>
         <?php else: ?>
           <?php if ($remaining !== null && $remaining <= 20): ?><div class="tix-left">RESTAM APENAS <?= $remaining ?> VAGAS</div><?php endif; ?>
           <a href="<?= e(url('inscricao?ingresso=' . $t['id'])) ?>" class="btn <?= $isFeatured ? 'btn-gold' : 'btn-ghost' ?> btn-block"><?= e($c('tickets', 'button', 'Escolher ingresso')) ?></a>

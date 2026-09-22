@@ -74,7 +74,12 @@
       }
     });
     if (msgs.length) {
-      box.innerHTML = msgs.map(function (m) { return '<div>• ' + m + '</div>'; }).join('');
+      box.innerHTML = '';
+      msgs.forEach(function (m) {
+        var d = document.createElement('div');
+        d.textContent = '• ' + m;
+        box.appendChild(d);
+      });
       box.classList.add('show');
       box.scrollIntoView({ behavior: 'smooth', block: 'center' });
     } else {

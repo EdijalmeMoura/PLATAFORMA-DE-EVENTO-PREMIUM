@@ -1,8 +1,10 @@
 <?php
 namespace App\Controllers;
 
+use App\Core\Csrf;
 use App\Core\Database;
 use App\Core\Event;
+use App\Core\RateLimiter;
 use App\Core\View;
 use App\Services\TicketService;
 
@@ -93,6 +95,18 @@ class PublicController {
         $d['page_title'] = 'Recuperar ticket — ' . $d['event']['name'];
         $d['error'] = null;
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            if (!Csrf::validate($_POST['csrf_token'] ?? '')) {
+                $d['error'] = 'Sessão expirada. Recarregue a página e tente novamente.';
+                View::render('public/lookup', $d, 'public/layout');
+                return;
+            }
+            $ip = client_ip();
+            if (!RateLimiter::check('lookup:' . $ip, 20, 3600)) {
+                $d['error'] = 'Muitas tentativas. Aguarde um pouco e tente novamente.';
+                View::render('public/lookup', $d, 'public/layout');
+                return;
+            }
+            RateLimiter::hit('lookup:' . $ip, 3600);
             $email = mb_strtolower(trim($_POST['email'] ?? ''));
             $code = trim($_POST['code'] ?? '');
             $reg = Database::fetch(

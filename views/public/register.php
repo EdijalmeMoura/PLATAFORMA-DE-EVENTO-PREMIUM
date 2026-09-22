@@ -34,15 +34,20 @@ foreach ($fields as $f) { $grouped[$f['section']][] = $f; }
         <div class="form-sec-title"><span class="step">0</span> SEU INGRESSO</div>
         <div class="form-sec-sub">Escolha a experiência ideal para você.</div>
         <div class="ticket-pick" id="ticketPick">
+          <?php $nowTick = date('Y-m-d H:i:s'); ?>
           <?php foreach ($tickets as $t):
             $remaining = ((int) $t['quantity'] > 0) ? max(0, (int) $t['quantity'] - (int) $t['sold']) : null;
             $soldOut = $remaining !== null && $remaining <= 0;
-            $sel = ((int) $selected_ticket === (int) $t['id']) || ((int) $selected_ticket === 0 && !$soldOut && !isset($picked));
-            if ($sel && !$soldOut) $picked = true;
+            $notStarted = !empty($t['sale_start']) && $nowTick < $t['sale_start'];
+            $ended = !empty($t['sale_end']) && $nowTick > $t['sale_end'];
+            $unavailable = $soldOut || $notStarted || $ended;
+            $unLabel = $soldOut ? 'ESGOTADO' : ($notStarted ? 'EM BREVE' : 'VENDAS ENCERRADAS');
+            $sel = ((int) $selected_ticket === (int) $t['id']) || ((int) $selected_ticket === 0 && !$unavailable && !isset($picked));
+            if ($sel && !$unavailable) $picked = true;
           ?>
-          <label class="ticket-opt <?= $sel && !$soldOut ? 'selected' : '' ?> <?= $soldOut ? 'soldout' : '' ?>">
-            <input type="radio" name="ticket_type_id" value="<?= (int) $t['id'] ?>" <?= $sel && !$soldOut ? 'checked' : '' ?> <?= $soldOut ? 'disabled' : '' ?>>
-            <span><span class="t-name"><?= e($t['name']) ?><?= $soldOut ? ' — ESGOTADO' : '' ?></span><br><span class="t-desc"><?= e($t['description'] ?? '') ?></span></span>
+          <label class="ticket-opt <?= $sel && !$unavailable ? 'selected' : '' ?> <?= $unavailable ? 'soldout' : '' ?>">
+            <input type="radio" name="ticket_type_id" value="<?= (int) $t['id'] ?>" <?= $sel && !$unavailable ? 'checked' : '' ?> <?= $unavailable ? 'disabled' : '' ?>>
+            <span><span class="t-name"><?= e($t['name']) ?><?= $unavailable ? ' — ' . $unLabel : '' ?></span><br><span class="t-desc"><?= e($t['description'] ?? '') ?></span></span>
             <span class="t-price"><?= $t['price'] > 0 ? 'R$ ' . number_format($t['price'], 2, ',', '.') : 'Grátis' ?></span>
           </label>
           <?php endforeach; ?>

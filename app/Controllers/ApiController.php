@@ -32,6 +32,10 @@ class ApiController {
             json_response(['ok' => false, 'errors' => $result], 422);
         }
         RateLimiter::hit('reg:' . $ip, 3600);
+        // Entrega imediata (best-effort): sem cron, a boas-vindas sairia nunca
+        try {
+            MessageService::processQueue($eventId, 5);
+        } catch (\Exception $e) { /* a fila tenta de novo no cron/painel */ }
         json_response([
             'ok' => true,
             'code' => $result['code'],
