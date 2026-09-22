@@ -183,10 +183,16 @@ class MessageService {
         $sent = 0; $failed = 0;
         foreach ($items as $it) {
             Database::update('message_queue', ['status' => 'processing', 'attempts' => (int) $it['attempts'] + 1], 'id = :id', ['id' => $it['id']]);
-            if ($it['channel'] === 'email') {
-                list($ok, $err) = EmailService::send($eventId, $it['to_address'], $it['subject'] ?: 'Mensagem do evento', $it['body'], $it['id']);
-            } else {
-                list($ok, $err) = WhatsAppService::send($eventId, $it['to_address'], $it['body']);
+            try {
+                if ($it['channel'] === 'email') {
+                    list($ok, $err) = EmailService::send($eventId, $it['to_address'], $it['subject'] ?: 'Mensagem do evento', $it['body'], $it['id']);
+                } else {
+                    list($ok, $err) = WhatsAppService::send($eventId, $it['to_address'], $it['body']);
+                }
+            } catch (\Throwable $e) {
+                // 1 item com erro fatal não pode matar o lote/cron inteiro
+                $ok = false;
+                $err = 'Erro interno: ' . $e->getMessage();
             }
             if ($ok) {
                 $sent++;

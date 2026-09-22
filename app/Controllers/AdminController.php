@@ -124,6 +124,13 @@ class AdminController {
 
     public static function comms() {
         $E = Event::id();
+        // Sem cron: processa um lote ao abrir a página (máx. 1x a cada 5 min)
+        try {
+            if (\App\Core\RateLimiter::check('autoq:' . $E, 1, 300)) {
+                \App\Core\RateLimiter::hit('autoq:' . $E, 300);
+                MessageService::processQueue($E, 10);
+            }
+        } catch (\Throwable $e) { /* nunca quebra a página */ }
         self::page('comunicacao', [
             'page' => 'comunicacao',
             'page_title' => 'Comunicação',

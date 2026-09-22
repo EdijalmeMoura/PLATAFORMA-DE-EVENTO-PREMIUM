@@ -58,12 +58,12 @@ class AdminCommsApiController {
                 'subject' => mb_substr(trim($input['subject'] ?? ''), 0, 160) ?: null,
                 'channel' => in_array($input['channel'] ?? '', ['email', 'whatsapp', 'both'], true) ? $input['channel'] : 'email',
                 'body' => $body,
-                'status' => 'draft',
                 'updated_at' => now(),
             ];
             if ($id > 0) {
                 Database::update('messages', $data, 'id = :id AND event_id = :e', ['id' => $id, 'e' => $E]);
             } else {
+                $data['status'] = 'draft';
                 $data['event_id'] = $E;
                 $data['created_by'] = Auth::id();
                 $data['created_at'] = now();
@@ -236,7 +236,7 @@ class AdminCommsApiController {
         $n = MessageService::enqueue($E, $rid, $channel, $subject, $body);
         MessageService::processQueue($E, 5);
         Audit::log(Auth::id(), 'single_send', 'registrations', $rid, ['channel' => $channel]);
-        json_response(['ok' => $n > 0, 'queued' => $n]);
+        json_response(['ok' => $n > 0, 'queued' => $n] + ($n > 0 ? [] : ['error' => 'Não foi possível enfileirar — verifique o e-mail/telefone do inscrito.']));
     }
 
     /** Pré-visualização com variáveis renderizadas */
@@ -268,7 +268,7 @@ class AdminCommsApiController {
             $t = Database::table('message_queue');
             $where = 'q.event_id = :e';
             $params = ['e' => $E];
-            if (in_array($status, ['queued', 'processing', 'sent', 'failed'], true)) {
+            if (in_array($status, ['queued', 'processing', 'sent', 'failed', 'cancelled'], true)) {
                 $where .= ' AND q.status = :st';
                 $params['st'] = $status;
             }
@@ -294,7 +294,7 @@ class AdminCommsApiController {
         if ($op === 'cancel') {
             self::needSend();
             $input = array_merge($_POST, json_input());
-            Database::update('message_queue', ['status' => 'failed', 'error' => 'Cancelado pelo operador'], 'id = :id AND event_id = :e AND status IN (\'queued\',\'processing\')', ['id' => (int) ($input['id'] ?? 0), 'e' => $E]);
+            Database::update('message_queue', ['status' => 'cancelled', 'error' => 'Cancelado pelo operador'], 'id = :id AND event_id = :e AND status IN (\'queued\',\'processing\')', ['id' => (int) ($input['id'] ?? 0), 'e' => $E]);
             json_response(['ok' => true]);
         }
         json_response(['ok' => false], 404);
@@ -340,7 +340,11 @@ class AdminCommsApiController {
         if (!empty($input['password'])) {
             $data['password_enc'] = Crypto::encrypt($input['password']);
         }
-        Database::update('email_settings', $data, 'event_id = :e', ['e' => $E]);
+        $affected = Database::update('email_settings', $data, 'event_id = :e', ['e' => $E]);
+        if ($affected === 0 && !Database::fetch('SELECT id FROM ' . Database::table('email_settings') . ' WHERE event_id = ?', [$E])) {
+            $data['event_id'] = $E;
+            Database::insert('email_settings', $data);
+        }
         Audit::log(Auth::id(), 'email_settings', 'email_settings', $E);
         json_response(['ok' => true]);
     }
@@ -371,7 +375,11 @@ class AdminCommsApiController {
         if (!empty($input['access_token'])) {
             $data['access_token_enc'] = Crypto::encrypt($input['access_token']);
         }
-        Database::update('whatsapp_settings', $data, 'event_id = :e', ['e' => $E]);
+        $affected = Database::update('whatsapp_settings', $data, 'event_id = :e', ['e' => $E]);
+        if ($affected === 0 && !Database::fetch('SELECT id FROM ' . Database::table('whatsapp_settings') . ' WHERE event_id = ?', [$E])) {
+            $data['event_id'] = $E;
+            Database::insert('whatsapp_settings', $data);
+        }
         Audit::log(Auth::id(), 'wa_settings', 'whatsapp_settings', $E);
         json_response(['ok' => true, 'status' => WhatsAppService::status($E)]);
     }

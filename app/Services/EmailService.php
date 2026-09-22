@@ -7,8 +7,8 @@ use App\Core\Database;
 defined('APP') or exit;
 
 /**
- * Envio de e-mail via SMTP próprio (sem dependências),
- * com fallback para mail() nativo.
+ * Envio de e-mail via SMTP próprio (sem dependências).
+ * Requer SMTP configurado em Comunicação → E-mail.
  */
 class EmailService {
     public static function settings($eventId) {
@@ -93,6 +93,7 @@ class EmailService {
         $hello = gethostname() ?: 'localhost';
         fwrite($fp, "EHLO $hello\r\n");
         $ehlo = $read();
+        $secured = ($enc === 'ssl'); // ssl:// já criptografa na conexão
         if ($enc === 'tls' && stripos($ehlo, 'STARTTLS') !== false) {
             fwrite($fp, "STARTTLS\r\n");
             $r = $read();
@@ -102,6 +103,12 @@ class EmailService {
             }
             fwrite($fp, "EHLO $hello\r\n");
             $read();
+            $secured = true;
+        }
+        // Nunca enviar credenciais em texto puro se o usuário pediu criptografia
+        if ($enc !== 'none' && !$secured) {
+            fclose($fp);
+            return ['ok' => false, 'error' => 'Servidor não oferece ' . strtoupper($enc) . '. Ajuste a criptografia ou use outro SMTP.'];
         }
         $user = trim($cfg['username'] ?? '');
         if ($user !== '') {
@@ -130,7 +137,8 @@ class EmailService {
             }
             return $out;
         };
-        $from = trim($cfg['from_email'] ?? '') ?: trim($cfg['username'] ?? '');
+        $from = str_replace(["\r", "\n", ' '], '', trim($cfg['from_email'] ?? '') ?: trim($cfg['username'] ?? ''));
+        if (!filter_var($from, FILTER_VALIDATE_EMAIL)) { fclose($fp); return [false, 'E-mail remetente inválido nas configurações.']; }
         $fromName = trim($cfg['from_name'] ?? '') ?: 'Evento';
         $boundary = '=_' . md5(uniqid('', true));
         $headers = '';
@@ -162,6 +170,7 @@ class EmailService {
     }
 
     private static function encodeHeader($text) {
+        $text = str_replace(["\r", "\n"], '', (string) $text); // anti header-injection
         if (!preg_match('/[^\x20-\x7E]/', $text)) return $text;
         return '=?UTF-8?B?' . base64_encode($text) . '?=';
     }

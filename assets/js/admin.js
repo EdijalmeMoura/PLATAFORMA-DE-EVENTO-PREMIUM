@@ -186,6 +186,7 @@
       CANCELLED: ['b-red', 'Cancelada'], CHECKED_IN: ['b-blue', 'Check-in OK'],
       queued: ['b-amber', 'Na fila'], processing: ['b-blue', 'Enviando'],
       sent: ['b-green', 'Enviado'], failed: ['b-red', 'Falhou'],
+      cancelled: ['b-gray', 'Cancelado'],
       ACTIVE: ['b-green', 'Ativo'], PAUSED: ['b-amber', 'Pausado'], SOLD_OUT: ['b-red', 'Esgotado'],
       APPROVED: ['b-green', 'Aprovado'], REFUSED: ['b-red', 'Recusado'], FREE: ['b-gold', 'Isento'],
       draft: ['b-gray', 'Rascunho'], active: ['b-green', 'Ativo'], archived: ['b-gray', 'Arquivado'],

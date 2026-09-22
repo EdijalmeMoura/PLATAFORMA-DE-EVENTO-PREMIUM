@@ -25,14 +25,13 @@ $E = (int) $event['id'];
 $reminders = MessageService::scheduleDateReminders($E);
 $r = MessageService::processQueue($E, 100);
 
-// Limpeza: rate limits antigos
+// Limpeza: rate limits antigos (data do PHP = mesmo relógio das gravações)
 try {
-    Database::query("DELETE FROM " . Database::table('rate_limits') . " WHERE window_start < datetime('now','-1 day')");
-} catch (Exception $e) {
-    try {
-        Database::query("DELETE FROM " . Database::table('rate_limits') . " WHERE window_start < DATE_SUB(NOW(), INTERVAL 1 DAY)");
-    } catch (Exception $e2) { /* ignora */ }
-}
+    Database::query(
+        'DELETE FROM ' . Database::table('rate_limits') . ' WHERE window_start < ?',
+        [date('Y-m-d H:i:s', strtotime('-1 day'))]
+    );
+} catch (Exception $e) { /* ignora */ }
 
 echo "Lembretes agendados: $reminders\n";
 echo "Fila — processados: {$r['processed']}, enviados: {$r['sent']}, falhas: {$r['failed']}\n";

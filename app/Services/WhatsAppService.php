@@ -40,6 +40,9 @@ class WhatsAppService {
      * exigem template aprovado na Meta — use $template nesses casos.
      */
     public static function send($eventId, $toPhone, $bodyText, $template = null) {
+        if (!function_exists('curl_init')) {
+            return [false, 'Extensão cURL do PHP indisponível na hospedagem.'];
+        }
         $cfg = self::settings($eventId);
         if (!$cfg || (int) $cfg['active'] !== 1) {
             return [false, 'WhatsApp não configurado. Configure em Comunicação → WhatsApp.'];

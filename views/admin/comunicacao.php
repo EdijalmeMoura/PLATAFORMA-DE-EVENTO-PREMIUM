@@ -134,7 +134,7 @@ $triggers = [
   <!-- FILA -->
   <div class="tab-pane" id="ct-queue">
     <div class="toolbar">
-      <select class="filter" id="q-status"><option value="">Todos</option><option value="queued">Aguardando</option><option value="processing">Processando</option><option value="sent">Enviados</option><option value="failed">Falhas</option></select>
+      <select class="filter" id="q-status"><option value="">Todos</option><option value="queued">Aguardando</option><option value="processing">Processando</option><option value="sent">Enviados</option><option value="failed">Falhas</option><option value="cancelled">Cancelados</option></select>
       <span class="spacer"></span>
       <?php if ($canSend): ?><button class="btn-ad btn-gold-ad btn-sm-ad" id="q-process"><?= Icons::get('refresh') ?> Processar agora</button><?php endif; ?>
     </div>
