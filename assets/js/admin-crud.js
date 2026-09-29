@@ -39,7 +39,7 @@
       } else if (f.type === 'check') {
         html += '<div style="display:flex;gap:10px;align-items:center;"><label class="toggle"><input type="checkbox" data-k="' + f.key + '"' + (+v === 1 || v === true ? ' checked' : '') + '><span></span></label><span style="font-size:13px;color:var(--ad-muted);">' + esc(f.hint || 'Ativo') + '</span></div>';
       } else if (f.type === 'image') {
-        html += (v ? '<img src="' + esc(window.ADMIN.base + v) + '" style="width:100%;max-height:160px;object-fit:cover;border-radius:10px;margin-bottom:10px;border:1px solid var(--ad-line);">' : '') +
+        html += (v ? '<img src="' + esc(typeof window.adminUrl === 'function' ? window.adminUrl(v) : String(window.ADMIN.base).replace(/\/+$/, '') + '/' + String(v).replace(/^\/+/, '')) + '" style="width:100%;max-height:160px;object-fit:cover;border-radius:10px;margin-bottom:10px;border:1px solid var(--ad-line);">' : '') +
           '<input type="file" data-k="' + f.key + '" accept="image/*"><input type="hidden" data-k="' + f.key + '_current" value="' + esc(v) + '">' +
           '<div class="help">JPG, PNG, WEBP ou SVG · máx. 5MB</div>';
       } else {

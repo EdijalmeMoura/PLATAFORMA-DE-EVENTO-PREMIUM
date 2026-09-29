@@ -16,6 +16,7 @@ use App\Core\Database;
 function current_path() {
     if (!empty($_GET['r'])) return trim($_GET['r'], '/');
     $uri = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
+    $uri = preg_replace('#/+#', '/', $uri); // tolera barra dupla em links antigos/favoritos
     $base = BASE_PATH;
     if ($base !== '' && strpos($uri, $base) === 0) {
         $uri = substr($uri, strlen($base));

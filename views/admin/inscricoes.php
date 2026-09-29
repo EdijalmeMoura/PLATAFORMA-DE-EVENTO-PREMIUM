@@ -147,7 +147,7 @@
         tr.querySelectorAll('.rowlink').forEach(function (td) {
           td.style.cursor = 'pointer';
           td.addEventListener('click', function () {
-            location.href = window.ADMIN.base + 'admin/inscricoes/' + tr.dataset.id;
+            location.href = (typeof window.adminUrl === 'function' ? window.adminUrl('admin/inscricoes/' + tr.dataset.id) : String(window.ADMIN.base).replace(/\/+$/, '') + '/admin/inscricoes/' + tr.dataset.id);
           });
         });
       });

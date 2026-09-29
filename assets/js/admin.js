@@ -67,6 +67,12 @@
     if (confirmCb) { var cb = confirmCb; confirmCb = null; cb(); }
   });
 
+  // Monta URL do painel à prova de barra dupla (funciona com qualquer versão dos arquivos)
+  window.adminUrl = function (p) {
+    var b = String((window.ADMIN && window.ADMIN.base) || '');
+    return b.replace(/\/+$/, '') + '/' + String(p || '').replace(/^\/+/, '');
+  };
+
   // API helper
   window.api = function (path, opts) {
     opts = opts || {};
@@ -81,7 +87,7 @@
       headers: headers,
       body: body || undefined,
     }).then(function (r) {
-      if (r.status === 401) { window.location.href = window.ADMIN.base + 'admin/login'; throw new Error('auth'); }
+      if (r.status === 401) { window.location.href = window.adminUrl('admin/login'); throw new Error('auth'); }
       return r.json().then(function (j) {
         if (!j.ok && r.status !== 200 && !opts.silent) toast(j.error || 'Erro na operação.', 'err');
         return j;
@@ -130,7 +136,7 @@
   var gs = document.getElementById('globalSearch');
   if (gs) gs.addEventListener('keydown', function (e) {
     if (e.key === 'Enter' && gs.value.trim() !== '') {
-      window.location.href = window.ADMIN.base + 'admin/inscricoes?q=' + encodeURIComponent(gs.value.trim());
+      window.location.href = window.adminUrl('admin/inscricoes?q=' + encodeURIComponent(gs.value.trim()));
     }
   });
 
@@ -146,7 +152,7 @@
         badge.textContent = j.alerts > 9 ? '9+' : j.alerts;
       } else badge.style.display = 'none';
       document.getElementById('notifList').innerHTML = j.items.map(function (it) {
-        return '<a class="notif-item ' + (it.cls || '') + '" href="' + window.ADMIN.base + it.link + '"><span>•</span><span>' + esc(it.text) + '</span></a>';
+        return '<a class="notif-item ' + (it.cls || '') + '" href="' + window.adminUrl(it.link) + '"><span>•</span><span>' + esc(it.text) + '</span></a>';
       }).join('');
     }).catch(function () {});
   }
