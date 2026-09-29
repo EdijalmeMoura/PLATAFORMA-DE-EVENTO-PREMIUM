@@ -23,6 +23,7 @@ class AdminApiController {
         $parts = explode('/', trim($sub, '/'));
         $action = $parts[0] ?? '';
 
+        try {
         switch ($action) {
             case 'dashboard-charts':
                 Auth::requireCan('dashboard.view');
@@ -74,6 +75,10 @@ class AdminApiController {
                 break;
             default:
                 json_response(['ok' => false, 'error' => 'Rota inválida.'], 404);
+        }
+        } catch (\Throwable $e) {
+            error_log('[admin-api:' . $action . '] ' . $e->getMessage());
+            json_response(['ok' => false, 'error' => 'Erro interno. Tente novamente.'], 500);
         }
     }
 

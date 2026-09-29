@@ -44,6 +44,23 @@
     st = document.getElementById('f-status'),
     tk = document.getElementById('f-ticket');
 
+  // Blindagem: se o admin.js do servidor estiver desatualizado, define os helpers aqui
+  if (typeof window.esc !== 'function') {
+    window.esc = function (s) {
+      if (s === null || s === undefined) return '';
+      return String(s).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    };
+  }
+  if (typeof window.statusBadge !== 'function') {
+    window.statusBadge = function (s) {
+      var map = { CONFIRMED: 'b-green', PENDING: 'b-amber', CANCELLED: 'b-red', CHECKED_IN: 'b-blue' };
+      var lbl = { CONFIRMED: 'Confirmada', PENDING: 'Pendente', CANCELLED: 'Cancelada', CHECKED_IN: 'Check-in OK' };
+      return '<span class="badge ' + (map[s] || 'b-gray') + '">' + esc(lbl[s] || s) + '</span>';
+    };
+  }
+
   // Busca vinda da barra global (?q=)
   try {
     var initialQ = new URLSearchParams(window.location.search).get('q');
@@ -102,6 +119,7 @@
       return;
     }
     api(apiUrl(), { silent: true }).then(function (j) {
+      try {
       if (!j.ok) { diagnose(); return; }
       pages = j.pages;
       document.getElementById('pg-info').textContent = 'Página ' + j.page + ' de ' + j.pages + ' · ' + j.total + ' registros';
@@ -142,6 +160,9 @@
           updateSelInfo();
         });
       });
+      } catch (renderErr) {
+        showLoadError('Diagnóstico: erro ao exibir os dados recebidos.');
+      }
     }).catch(function (e) {
       if (e && e.message === 'auth') return; // api() já redireciona para o login
       diagnose();
