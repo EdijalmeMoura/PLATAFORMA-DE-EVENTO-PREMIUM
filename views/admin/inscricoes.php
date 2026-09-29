@@ -68,9 +68,15 @@
     if (selCount()) f += '&ids=' + Object.keys(selected).join(',');
     return f;
   }
+  function showLoadError() {
+    var tb = document.getElementById('rows');
+    tb.innerHTML = '<tr><td colspan="9"><div class="empty">⚠️ Não foi possível carregar os inscritos.<br><br><button class="btn-ad btn-gold-ad btn-sm-ad" id="btn-retry">Tentar novamente</button></div></td></tr>';
+    document.getElementById('pg-info').textContent = '—';
+    document.getElementById('btn-retry').addEventListener('click', load);
+  }
   function load() {
-    api('/registrations?page=' + page + '&q=' + encodeURIComponent(q.value) + '&status=' + st.value + '&ticket=' + tk.value).then(function (j) {
-      if (!j.ok) return;
+    api('/registrations?page=' + page + '&q=' + encodeURIComponent(q.value) + '&status=' + st.value + '&ticket=' + tk.value, { silent: true }).then(function (j) {
+      if (!j.ok) { showLoadError(); return; }
       pages = j.pages;
       document.getElementById('pg-info').textContent = 'Página ' + j.page + ' de ' + j.pages + ' · ' + j.total + ' registros';
       document.getElementById('sel-all').checked = false;
@@ -110,6 +116,9 @@
           updateSelInfo();
         });
       });
+    }).catch(function (e) {
+      if (e && e.message === 'auth') return; // api() já redireciona para o login
+      showLoadError();
     });
   }
   document.getElementById('sel-all').addEventListener('change', function () {
