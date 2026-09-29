@@ -132,7 +132,7 @@ $initial = mb_strtoupper(mb_substr(trim($u['name'] ?? 'A'), 0, 1));
 <div class="toast-wrap" id="toasts"></div>
 <script>
 window.ADMIN = {
-  base: '<?= e(url('')) ?>',
+  base: '<?= e(rtrim(url(''), '/') . '/') ?>',
   api: '<?= e(url('api/admin')) ?>',
   csrf: '<?= e($csrf ?? '') ?>'
 };
