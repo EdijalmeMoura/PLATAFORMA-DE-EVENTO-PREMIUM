@@ -1,0 +1,20 @@
+# Blueprint do Render — deploy com 1 clique (New → Blueprint).
+# ATENÇÃO (plano free): o SQLite e os uploads são APAGADOS a cada novo deploy,
+# porque o plano free não tem disco persistente. Para produção, use o plano
+# Starter (ou superior) e descomente o bloco `disk:` abaixo.
+services:
+  - type: web
+    name: plataforma-evento-premium
+    runtime: docker
+    plan: free
+    branch: arena/01a0c6d7-plataforma-de-evento-premium
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /
+    envVars:
+      - key: APP_ENV
+        value: production
+    # Descomente para persistir o banco (exige plano Starter+):
+    # disk:
+    #   name: dados
+    #   mountPath: /var/www/html/storage
+    #   sizeGB: 1

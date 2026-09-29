@@ -1,0 +1,23 @@
+PLATAFORMA DE EVENTO PREMIUM — Instalação em subpasta "evento"
+=============================================================
+
+1. No painel da hospedagem (cPanel), abra o Gerenciador de Arquivos e entre
+   em public_html (ou www).
+
+2. Crie a pasta "evento" e envie este arquivo evento.zip para dentro dela.
+
+3. Extraia o evento.zip DENTRO da pasta evento, de modo que o index.php
+   fique em: public_html/evento/index.php
+   (Se criar uma subpasta extra, mova os arquivos para a raiz de /evento.)
+
+4. IMPORTANTE: confira se o arquivo oculto .htaccess foi extraído junto
+   em public_html/evento/.htaccess (ative "mostrar arquivos ocultos").
+
+5. Acesse no navegador: https://seudominio.com.br/evento/install.php
+   e siga o assistente de instalação (ele cria o banco e o admin).
+
+6. Pronto! O site fica em https://seudominio.com.br/evento/
+   e o painel em https://seudominio.com.br/evento/admin/login
+
+Requisitos: PHP 7.4 ou superior, SQLite (padrão) ou MySQL.
+Dúvidas de operação: veja MANUAL-DO-OPERADOR.md
