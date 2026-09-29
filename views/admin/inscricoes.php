@@ -68,15 +68,41 @@
     if (selCount()) f += '&ids=' + Object.keys(selected).join(',');
     return f;
   }
-  function showLoadError() {
+  function apiUrl() {
+    return '/registrations?page=' + page + '&q=' + encodeURIComponent(q.value) + '&status=' + st.value + '&ticket=' + tk.value;
+  }
+  function showLoadError(detail) {
     var tb = document.getElementById('rows');
-    tb.innerHTML = '<tr><td colspan="9"><div class="empty">⚠️ Não foi possível carregar os inscritos.<br><br><button class="btn-ad btn-gold-ad btn-sm-ad" id="btn-retry">Tentar novamente</button></div></td></tr>';
+    tb.innerHTML = '<tr><td colspan="9"><div class="empty">⚠️ Não foi possível carregar os inscritos.' +
+      (detail ? '<br><small style="color:var(--ad-muted)">' + esc(detail) + '</small>' : '') +
+      '<br><br><button class="btn-ad btn-gold-ad btn-sm-ad" id="btn-retry">Tentar novamente</button></div></td></tr>';
     document.getElementById('pg-info').textContent = '—';
     document.getElementById('btn-retry').addEventListener('click', load);
   }
+  // Em caso de falha, busca o motivo real (HTTP + mensagem do servidor) para exibir
+  function diagnose() {
+    try {
+      fetch(window.ADMIN.api + apiUrl(), {
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRF-Token': window.ADMIN.csrf },
+      }).then(function (r) {
+        return r.text().then(function (t) {
+          var clean = t.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 180);
+          showLoadError('Diagnóstico: HTTP ' + r.status + (clean ? ' — ' + clean : ''));
+        });
+      }).catch(function () {
+        showLoadError('Diagnóstico: sem resposta do servidor. Verifique sua conexão.');
+      });
+    } catch (e) {
+      showLoadError('Diagnóstico: falha de rede.');
+    }
+  }
   function load() {
-    api('/registrations?page=' + page + '&q=' + encodeURIComponent(q.value) + '&status=' + st.value + '&ticket=' + tk.value, { silent: true }).then(function (j) {
-      if (!j.ok) { showLoadError(); return; }
+    if (typeof api !== 'function' || !window.ADMIN || !window.ADMIN.api) {
+      showLoadError('Diagnóstico: JS do painel não carregou. Pressione Ctrl+F5.');
+      return;
+    }
+    api(apiUrl(), { silent: true }).then(function (j) {
+      if (!j.ok) { diagnose(); return; }
       pages = j.pages;
       document.getElementById('pg-info').textContent = 'Página ' + j.page + ' de ' + j.pages + ' · ' + j.total + ' registros';
       document.getElementById('sel-all').checked = false;
@@ -118,7 +144,7 @@
       });
     }).catch(function (e) {
       if (e && e.message === 'auth') return; // api() já redireciona para o login
-      showLoadError();
+      diagnose();
     });
   }
   document.getElementById('sel-all').addEventListener('change', function () {
