@@ -50,6 +50,68 @@
     });
   });
 
+  // CEP automático (ViaCEP): preenche rua, bairro, cidade e UF
+  (function () {
+    var cep = document.getElementById('cep');
+    if (!cep) return;
+    var lastQuery = '';
+    function byId(id) { return document.getElementById(id); }
+    function setCepMsg(msg) {
+      var wrap = cep.closest('.field') || form.querySelector('[data-field="cep"]');
+      if (!wrap) return;
+      wrap.classList.toggle('invalid', !!msg);
+      var m = wrap.querySelector('.err-msg');
+      if (m) m.textContent = msg || '';
+    }
+    function fill(data) {
+      var map = { street: data.logradouro || '', district: data.bairro || '', addr_city: data.localidade || '', addr_state: data.uf || '' };
+      Object.keys(map).forEach(function (id) {
+        var el = byId(id);
+        if (el && map[id]) el.value = map[id];
+      });
+      // Também preenche cidade/UF pessoais se existirem e estiverem vazios
+      var pc = byId('city'), ps = byId('state');
+      if (pc && !pc.value && data.localidade) pc.value = data.localidade;
+      if (ps && !ps.value && data.uf) ps.value = data.uf;
+      var num = byId('number');
+      if (num) num.focus();
+    }
+    function loading(on) {
+      ['street', 'district', 'addr_city', 'addr_state'].forEach(function (id) {
+        var el = byId(id);
+        if (!el) return;
+        if (on) { el.dataset.ph = el.placeholder; el.placeholder = 'Buscando…'; el.readOnly = true; }
+        else { if (el.dataset.ph !== undefined) el.placeholder = el.dataset.ph; el.readOnly = false; }
+      });
+    }
+    function lookup() {
+      var digits = cep.value.replace(/\D/g, '');
+      setCepMsg('');
+      if (digits.length !== 8 || digits === lastQuery) return;
+      lastQuery = digits;
+      loading(true);
+      fetch('https://viacep.com.br/ws/' + digits + '/json/')
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          loading(false);
+          if (!data || data.erro) {
+            setCepMsg('CEP não encontrado. Confira o número ou preencha o endereço manualmente.');
+            return;
+          }
+          fill(data);
+        })
+        .catch(function () {
+          loading(false);
+          lastQuery = '';
+          setCepMsg('Não foi possível buscar o CEP. Preencha o endereço manualmente.');
+        });
+    }
+    cep.addEventListener('blur', lookup);
+    cep.addEventListener('input', function () {
+      if (cep.value.replace(/\D/g, '').length === 8) lookup();
+    });
+  })();
+
   function showErrors(errors) {
     form.querySelectorAll('.field').forEach(function (f) {
       f.classList.remove('invalid');
