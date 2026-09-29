@@ -48,9 +48,7 @@
   if (typeof window.esc !== 'function') {
     window.esc = function (s) {
       if (s === null || s === undefined) return '';
-      return String(s).replace(/[&<>"']/g, function (c) {
-        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-      });
+      return String(s).split('&').join('&amp;').split('<').join('&lt;').split('>').join('&gt;').split('"').join('&quot;').split("'").join('&#39;');
     };
   }
   if (typeof window.statusBadge !== 'function') {
