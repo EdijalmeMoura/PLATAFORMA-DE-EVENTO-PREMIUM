@@ -231,3 +231,64 @@ table.tbl{width:100%;border-collapse:collapse;font-size:13.8px;min-width:760px}
 .perm{display:flex;gap:10px;align-items:center;background:#0e0e0e;border:1px solid var(--ad-line);border-radius:10px;padding:10px 13px;font-size:13.5px;cursor:pointer}
 .perm:hover{border-color:var(--ad-line-gold)}
 .perm input{width:16px;height:16px;accent-color:#C9A227}
+
+/* ============================================================
+   RESPONSIVO — celular e tablet pequeno
+   ============================================================ */
+/* Grids inline 2fr/1fr (detalhe, dashboard, comunicação) empilham */
+@media(max-width:860px){
+  .grid[style*="2fr 1fr"]{grid-template-columns:1fr !important}
+}
+@media(max-width:640px){
+  /* Topo */
+  .top{flex-wrap:wrap;gap:10px}
+  .top-title{flex:1;min-width:0}
+  .top-title h1{font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .top-title span{display:none}
+  .top-actions{margin-left:0}
+  .user-chip{padding:5px}
+  .alert{font-size:12.5px;padding:11px 14px}
+  .container-pad{padding-left:14px;padding-right:14px}
+  /* Cards e stats */
+  .card{padding:16px}
+  .stat{padding:16px}
+  .stat-num{font-size:28px}
+  .chart-box{height:220px}
+  .chart-box canvas{max-height:220px}
+  /* Barra de ferramentas: busca ocupa a linha toda */
+  .search-box{flex:1 1 100%;max-width:none;min-width:0}
+  select.filter{flex:1;min-width:0}
+  .toolbar .btn-ad{flex:1}
+  /* Abas com rolagem horizontal */
+  .tabs{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:6px}
+  .tab-btn{white-space:nowrap;flex:none}
+  /* Listas e relatórios */
+  .list-item{flex-wrap:wrap}
+  .report-bar .lbl{width:104px;font-size:12.5px}
+  .check-result .big{font-size:18px}
+  /* Modal vira bottom-sheet */
+  .modal{padding:0;align-items:flex-end}
+  .modal-card{border-radius:18px 18px 0 0;max-height:94vh;max-width:100%}
+  .modal-head,.modal-body{padding:18px 16px}
+  .modal-foot{padding:14px 16px;flex-direction:column-reverse;align-items:stretch}
+  .modal-foot .btn-ad{width:100%}
+  /* Toasts largos */
+  .toast-wrap{left:14px;right:14px;bottom:14px}
+  /* Alvos de toque maiores */
+  .btn-ad{min-height:42px}
+  .icon-btn{width:40px;height:40px}
+  .side-nav a,.side-foot a{padding:12px}
+  /* ---------- Tabelas viram cards ---------- */
+  table.tbl-cards{min-width:0 !important}
+  .tbl-cards thead{display:none}
+  .tbl-cards,.tbl-cards tbody,.tbl-cards tr,.tbl-cards td{display:block;width:100%}
+  .tbl-cards tr{background:var(--ad-card2);border:1px solid var(--ad-line);border-radius:12px;margin:0 10px 10px;padding:6px 2px}
+  .tbl-cards tbody tr:hover{background:var(--ad-card2)}
+  .tbl-cards td{border:0;padding:7px 14px;display:flex;gap:10px;align-items:baseline;text-align:left}
+  .tbl-cards td::before{content:attr(data-label);flex:none;width:92px;font-size:10px;letter-spacing:1.2px;font-weight:700;color:var(--ad-muted);text-transform:uppercase}
+  .tbl-cards td.no-label::before,.tbl-cards td[colspan]::before{display:none}
+  .tbl-cards td.no-label{padding:6px 14px}
+  .tbl-cards td[colspan]{display:block}
+  .tbl-cards td .empty{padding:30px 10px}
+  .tbl-cards .row-check{display:none}
+}

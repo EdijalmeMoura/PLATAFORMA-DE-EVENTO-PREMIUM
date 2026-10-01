@@ -1,6 +1,6 @@
 <?php defined('APP') or exit; use App\Core\Auth; use App\Core\Crypto; use App\Core\Icons;
 $canSend = Auth::can('comms.send');
-$extra_js = '<script src="' . e(url('assets/js/admin-comms.js')) . '?v=1.0.0" defer></script>';
+$extra_js = '<script src="' . e(url('assets/js/admin-comms.js')) . '?v=1.1.0" defer></script>';
 $triggers = [
   'after_register' => 'Após inscrição (boas-vindas)', 'after_payment' => 'Após pagamento aprovado',
   'd7_before' => '7 dias antes do evento', 'd1_before' => '1 dia antes (24h)',
@@ -138,7 +138,7 @@ $triggers = [
       <span class="spacer"></span>
       <?php if ($canSend): ?><button class="btn-ad btn-gold-ad btn-sm-ad" id="q-process"><?= Icons::get('refresh') ?> Processar agora</button><?php endif; ?>
     </div>
-    <div class="table-wrap"><table class="tbl"><thead><tr><th>#</th><th>Para</th><th>Canal</th><th>Assunto</th><th>Status</th><th>Criado em</th><th></th></tr></thead><tbody id="q-rows"></tbody></table></div>
+    <div class="table-wrap"><table class="tbl tbl-cards"><thead><tr><th>#</th><th>Para</th><th>Canal</th><th>Assunto</th><th>Status</th><th>Criado em</th><th></th></tr></thead><tbody id="q-rows"></tbody></table></div>
     <div class="pager"><button class="icon-btn" id="q-prev"><?= Icons::get('arrow-left') ?></button><span id="q-info"></span><button class="icon-btn" id="q-next"><?= Icons::get('arrow-right') ?></button></div>
   </div>
 
@@ -147,7 +147,7 @@ $triggers = [
     <div class="toolbar">
       <select class="filter" id="l-channel"><option value="">Todos os canais</option><option value="email">E-mail</option><option value="whatsapp">WhatsApp</option></select>
     </div>
-    <div class="table-wrap"><table class="tbl"><thead><tr><th>Data</th><th>Participante</th><th>Canal</th><th>Destino</th><th>Mensagem</th><th>Status</th></tr></thead><tbody id="l-rows"></tbody></table></div>
+    <div class="table-wrap"><table class="tbl tbl-cards"><thead><tr><th>Data</th><th>Participante</th><th>Canal</th><th>Destino</th><th>Mensagem</th><th>Status</th></tr></thead><tbody id="l-rows"></tbody></table></div>
     <div class="pager"><button class="icon-btn" id="l-prev"><?= Icons::get('arrow-left') ?></button><span id="l-info"></span><button class="icon-btn" id="l-next"><?= Icons::get('arrow-right') ?></button></div>
   </div>
 

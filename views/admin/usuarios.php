@@ -7,17 +7,17 @@ $allPerms = Auth::allPermissions();
   <button class="btn-ad btn-gold-ad btn-sm-ad" id="btn-new"><?= Icons::get('plus') ?> Novo usuário</button>
 </div>
 <div class="table-wrap">
-  <table class="tbl">
+  <table class="tbl tbl-cards">
     <thead><tr><th>Nome</th><th>E-mail</th><th>Perfil</th><th>Status</th><th>Último acesso</th><th></th></tr></thead>
     <tbody>
       <?php foreach ($users as $usr): ?>
       <tr>
-        <td><strong><?= e($usr['name']) ?></strong><?= $usr['id'] == Auth::id() ? ' <span class="badge b-gold">você</span>' : '' ?></td>
-        <td><?= e($usr['email']) ?></td>
-        <td><span class="badge b-blue"><?= e($usr['role_name']) ?></span></td>
-        <td><?= $usr['active'] ? '<span class="badge b-green">Ativo</span>' : '<span class="badge b-gray">Inativo</span>' ?></td>
-        <td><?= $usr['last_login_at'] ? e(fdate($usr['last_login_at'], true)) : '—' ?></td>
-        <td style="white-space:nowrap;">
+        <td data-label="Nome"><strong><?= e($usr['name']) ?></strong><?= $usr['id'] == Auth::id() ? ' <span class="badge b-gold">você</span>' : '' ?></td>
+        <td data-label="E-mail"><?= e($usr['email']) ?></td>
+        <td data-label="Perfil"><span class="badge b-blue"><?= e($usr['role_name']) ?></span></td>
+        <td data-label="Status"><?= $usr['active'] ? '<span class="badge b-green">Ativo</span>' : '<span class="badge b-gray">Inativo</span>' ?></td>
+        <td data-label="Último acesso"><?= $usr['last_login_at'] ? e(fdate($usr['last_login_at'], true)) : '—' ?></td>
+        <td class="no-label" style="white-space:nowrap;">
           <button class="icon-btn u-edit" data-id="<?= (int) $usr['id'] ?>" data-name="<?= e($usr['name']) ?>" data-email="<?= e($usr['email']) ?>" data-role="<?= e($usr['role_slug']) ?>" data-active="<?= (int) $usr['active'] ?>" title="Editar"><?= Icons::get('edit') ?></button>
           <?php if ($usr['id'] != Auth::id()): ?>
           <button class="icon-btn u-del" data-id="<?= (int) $usr['id'] ?>" title="Excluir"><?= Icons::get('trash') ?></button>

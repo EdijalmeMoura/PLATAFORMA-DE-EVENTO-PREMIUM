@@ -45,16 +45,16 @@ $extra_js = '<script src="' . e(url('assets/js/admin-dashboard.js')) . '?v=1.0.0
       <a href="<?= e(url('admin/inscricoes')) ?>" class="btn-ad btn-ghost-ad btn-sm-ad">Ver todas</a>
     </div>
     <div class="table-wrap" style="border:0;">
-      <table class="tbl" style="min-width:560px;">
+      <table class="tbl tbl-cards" style="min-width:560px;">
         <thead><tr><th>Código</th><th>Nome</th><th>Ingresso</th><th>Status</th></tr></thead>
         <tbody>
           <?php if (empty($recent)): ?><tr><td colspan="4" style="text-align:center;color:var(--ad-muted);">Nenhuma inscrição ainda.</td></tr><?php endif; ?>
           <?php foreach ($recent as $r): ?>
           <tr class="rowlink" onclick="location.href='<?= e(url('admin/inscricoes/' . $r['id'])) ?>'">
-            <td class="mono"><?= e($r['code']) ?></td>
-            <td><strong><?= e($r['name']) ?></strong><br><small style="color:var(--ad-muted);"><?= e($r['email']) ?></small></td>
-            <td><?= e($r['ticket_name'] ?? '—') ?></td>
-            <td><span class="badge <?= $r['status'] === 'CONFIRMED' ? 'b-green' : ($r['status'] === 'CHECKED_IN' ? 'b-blue' : ($r['status'] === 'CANCELLED' ? 'b-red' : 'b-amber')) ?>"><?= e(registration_status_label($r['status'])) ?></span></td>
+            <td class="mono" data-label="Código"><?= e($r['code']) ?></td>
+            <td data-label="Nome"><strong><?= e($r['name']) ?></strong><br><small style="color:var(--ad-muted);"><?= e($r['email']) ?></small></td>
+            <td data-label="Ingresso"><?= e($r['ticket_name'] ?? '—') ?></td>
+            <td data-label="Status"><span class="badge <?= $r['status'] === 'CONFIRMED' ? 'b-green' : ($r['status'] === 'CHECKED_IN' ? 'b-blue' : ($r['status'] === 'CANCELLED' ? 'b-red' : 'b-amber')) ?>"><?= e(registration_status_label($r['status'])) ?></span></td>
           </tr>
           <?php endforeach; ?>
         </tbody>

@@ -22,7 +22,7 @@
 </div>
 
 <div class="table-wrap">
-  <table class="tbl">
+  <table class="tbl tbl-cards">
     <thead><tr>
       <th style="width:36px;"><input type="checkbox" id="sel-all" style="width:16px;height:16px;accent-color:#C9A227;"></th>
       <th>Código</th><th>Nome</th><th>Contato</th><th>Empresa</th><th>Ingresso</th><th>Inscrição</th><th>Status</th><th>Check-in</th>
@@ -133,15 +133,15 @@
           : '<span class="badge b-gray">Não realizado</span>';
         var checked = selected[r.id] ? ' checked' : '';
         return '<tr data-id="' + r.id + '">' +
-          '<td><input type="checkbox" class="row-sel" data-id="' + r.id + '" style="width:16px;height:16px;accent-color:#C9A227;"' + checked + '></td>' +
-          '<td class="mono rowlink">' + esc(r.code) + '</td>' +
-          '<td class="rowlink"><strong>' + esc(r.name) + '</strong></td>' +
-          '<td class="rowlink">' + esc(r.email) + '<br><small style="color:var(--ad-muted)">' + esc(r.whatsapp || r.phone || '') + '</small></td>' +
-          '<td class="rowlink">' + esc(r.company || '—') + '</td>' +
-          '<td class="rowlink">' + esc(r.ticket_name || '—') + '</td>' +
-          '<td class="rowlink">' + esc(fmtDT(r.created_at)) + '</td>' +
-          '<td class="rowlink">' + statusBadge(r.status) + '</td>' +
-          '<td class="rowlink">' + check + '</td></tr>';
+          '<td class="row-check"><input type="checkbox" class="row-sel" data-id="' + r.id + '" style="width:16px;height:16px;accent-color:#C9A227;"' + checked + '></td>' +
+          '<td class="mono rowlink" data-label="Código">' + esc(r.code) + '</td>' +
+          '<td class="rowlink" data-label="Nome"><strong>' + esc(r.name) + '</strong></td>' +
+          '<td class="rowlink" data-label="Contato">' + esc(r.email) + '<br><small style="color:var(--ad-muted)">' + esc(r.whatsapp || r.phone || '') + '</small></td>' +
+          '<td class="rowlink" data-label="Empresa">' + esc(r.company || '—') + '</td>' +
+          '<td class="rowlink" data-label="Ingresso">' + esc(r.ticket_name || '—') + '</td>' +
+          '<td class="rowlink" data-label="Inscrição">' + esc(fmtDT(r.created_at)) + '</td>' +
+          '<td class="rowlink" data-label="Status">' + statusBadge(r.status) + '</td>' +
+          '<td class="rowlink" data-label="Check-in">' + check + '</td></tr>';
       }).join('');
       tb.querySelectorAll('tr').forEach(function (tr) {
         tr.querySelectorAll('.rowlink').forEach(function (td) {

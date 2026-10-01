@@ -189,11 +189,11 @@
         var acts = '';
         if (r.status === 'failed') acts += '<button class="btn-ad btn-ghost-ad btn-sm-ad q-retry" data-id="' + r.id + '">Repetir</button> ';
         if (r.status === 'queued' || r.status === 'processing') acts += '<button class="btn-ad btn-red-ad btn-sm-ad q-cancel" data-id="' + r.id + '">Cancelar</button>';
-        return '<tr><td class="mono">#' + r.id + '</td><td>' + esc(r.reg_name || '—') + '<br><small class="mono">' + esc(r.to_address) + '</small>' +
+        return '<tr><td class="mono" data-label="#">#' + r.id + '</td><td data-label="Para">' + esc(r.reg_name || '—') + '<br><small class="mono">' + esc(r.to_address) + '</small>' +
           (r.error ? '<br><small style="color:var(--ad-red)">' + esc(r.error) + '</small>' : '') + '</td>' +
-          '<td>' + (r.channel === 'email' ? 'E-mail' : 'WhatsApp') + '</td>' +
-          '<td>' + esc(r.subject || '—') + '</td><td>' + statusBadge(r.status) + '</td>' +
-          '<td>' + esc((r.created_at || '').slice(0, 16)) + '</td><td>' + acts + '</td></tr>';
+          '<td data-label="Canal">' + (r.channel === 'email' ? 'E-mail' : 'WhatsApp') + '</td>' +
+          '<td data-label="Assunto">' + esc(r.subject || '—') + '</td><td data-label="Status">' + statusBadge(r.status) + '</td>' +
+          '<td data-label="Criado em">' + esc((r.created_at || '').slice(0, 16)) + '</td><td class="no-label">' + acts + '</td></tr>';
       }).join('') : '<tr><td colspan="7"><div class="empty">Fila vazia.</div></td></tr>';
       tb.querySelectorAll('.q-retry').forEach(function (b) {
         b.addEventListener('click', function () {
@@ -232,11 +232,11 @@
       lPages = j.pages;
       document.getElementById('l-info').textContent = 'Página ' + j.page + ' de ' + j.pages + ' · ' + j.total;
       document.getElementById('l-rows').innerHTML = j.rows.length ? j.rows.map(function (r) {
-        return '<tr><td>' + esc((r.created_at || '').slice(0, 16)) + '</td><td>' + esc(r.reg_name || '—') + '</td>' +
-          '<td>' + (r.channel === 'email' ? 'E-mail' : 'WhatsApp') + '</td><td class="mono">' + esc(r.to_address) + '</td>' +
-          '<td>' + esc(r.subject || (r.body_excerpt || '').slice(0, 60)) + (r.opened_at ? ' <span class="badge b-green">aberto</span>' : '') +
+        return '<tr><td data-label="Data">' + esc((r.created_at || '').slice(0, 16)) + '</td><td data-label="Participante">' + esc(r.reg_name || '—') + '</td>' +
+          '<td data-label="Canal">' + (r.channel === 'email' ? 'E-mail' : 'WhatsApp') + '</td><td class="mono" data-label="Destino">' + esc(r.to_address) + '</td>' +
+          '<td data-label="Mensagem">' + esc(r.subject || (r.body_excerpt || '').slice(0, 60)) + (r.opened_at ? ' <span class="badge b-green">aberto</span>' : '') +
           (r.error ? '<br><small style="color:var(--ad-red)">' + esc(r.error) + '</small>' : '') + '</td>' +
-          '<td>' + statusBadge(r.status) + '</td></tr>';
+          '<td data-label="Status">' + statusBadge(r.status) + '</td></tr>';
       }).join('') : '<tr><td colspan="6"><div class="empty">Nenhum envio registrado.</div></td></tr>';
     });
   }
